@@ -15,29 +15,34 @@ export function LedgerSummary({ totals }: LedgerSummaryProps) {
   return (
     <Box
       display="grid"
-      gap="4"
+      gap={{ mobile: "2.5", tablet: "4" }}
       width="100%"
       style={{
-        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+        gridTemplateColumns: "repeat(auto-fit, minmax(135px, 1fr))",
       }}
     >
       {/* 1. 총 수입 */}
       <Box
         bg="surface"
-        p="5"
+        p={{ mobile: "3", tablet: "5" }}
         rounded="2xl"
         borderWidth="1px"
         borderStyle="solid"
         borderColor="border"
-        style={{ borderTop: "4px solid #248A54" }}
+        style={{ borderTop: "4px solid var(--color-success)" }}
         display="flex"
         flexDirection="column"
-        gap="2"
+        gap="1.5"
       >
         <Box fontSize="xs" fontWeight="semibold" color="textMuted">
           총 수입
         </Box>
-        <Box fontSize="2xl" fontWeight="bold" color="text" style={{ fontVariantNumeric: "tabular-nums" }}>
+        <Box
+          fontSize={{ mobile: "lg", tablet: "2xl" }}
+          fontWeight="bold"
+          color="text"
+          style={{ fontVariantNumeric: "tabular-nums", wordBreak: "break-all" }}
+        >
           {formatWon(totals.income)}
         </Box>
       </Box>
@@ -45,20 +50,25 @@ export function LedgerSummary({ totals }: LedgerSummaryProps) {
       {/* 2. 총 지출 */}
       <Box
         bg="surface"
-        p="5"
+        p={{ mobile: "3", tablet: "5" }}
         rounded="2xl"
         borderWidth="1px"
         borderStyle="solid"
         borderColor="border"
-        style={{ borderTop: "4px solid #DC2626" }}
+        style={{ borderTop: "4px solid var(--color-danger)" }}
         display="flex"
         flexDirection="column"
-        gap="2"
+        gap="1.5"
       >
-        <Box fontSize="xs" fontWeight="semibold" color="textMuted">
-          총 지출 (공동 + 개인)
+        <Box fontSize="xs" fontWeight="semibold" color="textMuted" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          총 지출 (공동+개인)
         </Box>
-        <Box fontSize="2xl" fontWeight="bold" color="text" style={{ fontVariantNumeric: "tabular-nums" }}>
+        <Box
+          fontSize={{ mobile: "lg", tablet: "2xl" }}
+          fontWeight="bold"
+          color="text"
+          style={{ fontVariantNumeric: "tabular-nums", wordBreak: "break-all" }}
+        >
           {formatWon(totals.totalExpense)}
         </Box>
       </Box>
@@ -66,20 +76,25 @@ export function LedgerSummary({ totals }: LedgerSummaryProps) {
       {/* 3. 총 저축 */}
       <Box
         bg="surface"
-        p="5"
+        p={{ mobile: "3", tablet: "5" }}
         rounded="2xl"
         borderWidth="1px"
         borderStyle="solid"
         borderColor="border"
-        style={{ borderTop: "4px solid #3898EC" }}
+        style={{ borderTop: "4px solid var(--color-primary)" }}
         display="flex"
         flexDirection="column"
-        gap="2"
+        gap="1.5"
       >
         <Box fontSize="xs" fontWeight="semibold" color="textMuted">
           총 저축 · 투자
         </Box>
-        <Box fontSize="2xl" fontWeight="bold" color="text" style={{ fontVariantNumeric: "tabular-nums" }}>
+        <Box
+          fontSize={{ mobile: "lg", tablet: "2xl" }}
+          fontWeight="bold"
+          color="text"
+          style={{ fontVariantNumeric: "tabular-nums", wordBreak: "break-all" }}
+        >
           {formatWon(totals.savings)}
         </Box>
       </Box>
@@ -87,25 +102,26 @@ export function LedgerSummary({ totals }: LedgerSummaryProps) {
       {/* 4. 순잔액 */}
       <Box
         bg="surface"
-        p="5"
+        p={{ mobile: "3", tablet: "5" }}
         rounded="2xl"
         borderWidth="1px"
         borderStyle="solid"
         borderColor="border"
-        style={{ borderTop: "4px solid #D97706" }}
+        style={{ borderTop: "4px solid var(--color-warning)" }}
         display="flex"
         flexDirection="column"
-        gap="2"
+        gap="1.5"
       >
-        <Box fontSize="xs" fontWeight="semibold" color="textMuted">
-          순잔액 (수입 - 지출 - 저축)
+        <Box fontSize="xs" fontWeight="semibold" color="textMuted" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          순잔액
         </Box>
         <Box
-          fontSize="2xl"
+          fontSize={{ mobile: "lg", tablet: "2xl" }}
           fontWeight="bold"
           style={{
-            color: totals.balance >= 0 ? "#1E293B" : "#DC2626",
+            color: totals.balance >= 0 ? "var(--color-text)" : "var(--color-danger)",
             fontVariantNumeric: "tabular-nums",
+            wordBreak: "break-all",
           }}
         >
           {formatWon(totals.balance)}

@@ -1,10 +1,12 @@
 "use client";
 
 import { Box, Badge, Button } from "@/components/ui";
-import { Entry, CATEGORY_MAP } from "@/types/ledger";
+import { Entry, CATEGORY_MAP, CategoryMap } from "@/types/ledger";
+import { TABLE_MIN_WIDTH } from "@/config/ui.config";
 
 interface LedgerTableProps {
   entries: Entry[];
+  categoryMap?: CategoryMap;
   onDeleteEntry: (id: string) => void;
 }
 
@@ -12,7 +14,12 @@ function formatWon(amount: number) {
   return amount.toLocaleString("ko-KR") + "원";
 }
 
-export function LedgerTable({ entries, onDeleteEntry }: LedgerTableProps) {
+export function LedgerTable({
+  entries,
+  categoryMap,
+  onDeleteEntry,
+}: LedgerTableProps) {
+  const map = categoryMap || CATEGORY_MAP;
   const sortedEntries = entries
     .slice()
     .sort((a, b) => (a.date < b.date ? 1 : -1));
@@ -37,7 +44,7 @@ export function LedgerTable({ entries, onDeleteEntry }: LedgerTableProps) {
             width: "100%",
             borderCollapse: "collapse",
             fontSize: "0.875rem",
-            minWidth: "640px",
+            minWidth: TABLE_MIN_WIDTH,
             textAlign: "left",
           }}
         >
@@ -49,11 +56,11 @@ export function LedgerTable({ entries, onDeleteEntry }: LedgerTableProps) {
                 borderBottom: "1px solid var(--color-border)",
               }}
             >
-              <th style={{ padding: "12px 16px", fontWeight: 600 }}>날짜</th>
-              <th style={{ padding: "12px 16px", fontWeight: 600 }}>대분류</th>
-              <th style={{ padding: "12px 16px", fontWeight: 600 }}>소분류</th>
+              <th style={{ padding: "12px 16px", fontWeight: 600, width: "115px", minWidth: "105px", whiteSpace: "nowrap" }}>날짜</th>
+              <th style={{ padding: "12px 16px", fontWeight: 600, width: "110px", minWidth: "90px" }}>대분류</th>
+              <th style={{ padding: "12px 16px", fontWeight: 600, width: "110px", minWidth: "90px" }}>소분류</th>
               <th style={{ padding: "12px 16px", fontWeight: 600 }}>항목명</th>
-              <th style={{ padding: "12px 16px", fontWeight: 600, textAlign: "right" }}>
+              <th style={{ padding: "12px 16px", fontWeight: 600, textAlign: "right", width: "120px", minWidth: "100px" }}>
                 금액
               </th>
               <th style={{ padding: "12px 16px", textAlign: "center", width: "80px" }}>
@@ -77,7 +84,7 @@ export function LedgerTable({ entries, onDeleteEntry }: LedgerTableProps) {
               </tr>
             ) : (
               sortedEntries.map((e) => {
-                const cat = CATEGORY_MAP[e.major];
+                const cat = map[e.major];
                 const badgeVariant =
                   cat?.type === "income"
                     ? "income"
@@ -93,7 +100,15 @@ export function LedgerTable({ entries, onDeleteEntry }: LedgerTableProps) {
                       transition: "background-color 0.15s ease",
                     }}
                   >
-                    <td style={{ padding: "12px 16px", color: "var(--color-text-muted)" }}>
+                    <td
+                      style={{
+                        padding: "12px 16px",
+                        color: "var(--color-text-muted)",
+                        minWidth: "105px",
+                        whiteSpace: "nowrap",
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
                       {e.date}
                     </td>
                     <td style={{ padding: "12px 16px" }}>
@@ -113,9 +128,9 @@ export function LedgerTable({ entries, onDeleteEntry }: LedgerTableProps) {
                         fontVariantNumeric: "tabular-nums",
                         color:
                           cat?.type === "income"
-                            ? "#248A54"
+                            ? "var(--color-success)"
                             : cat?.type === "save"
-                            ? "#2563EB"
+                            ? "var(--color-save)"
                             : "var(--color-text)",
                       }}
                     >
@@ -142,16 +157,6 @@ export function LedgerTable({ entries, onDeleteEntry }: LedgerTableProps) {
             )}
           </tbody>
         </table>
-      </Box>
-
-      <Box
-        as="p"
-        fontSize="xs"
-        color="textMuted"
-        textAlign="center"
-        py="2"
-      >
-        가계부 데이터는 브라우저 저장소(LocalStorage)에 안전하게 보관됩니다.
       </Box>
     </Box>
   );

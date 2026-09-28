@@ -54,6 +54,7 @@
 | **PB-DEV-001** | 코드 품질 검증 및 커밋 표준 절차 가이드 | Git 커밋 및 변경 사항 정리 시 | [pb-code-quality-and-commit.md](file:///C:/Users/zipo1/workspace/budget-book/.agents/skills/knowledge-management/playbooks/pb-code-quality-and-commit.md) | Active |
 | **PB-UI-001** | Box 및 Recipe 기반 UI 컴포넌트 개발 절차 가이드 | 신규 UI 컴포넌트 개발 시 | [pb-ui-component-development.md](file:///C:/Users/zipo1/workspace/budget-book/.agents/skills/knowledge-management/playbooks/pb-ui-component-development.md) | Active |
 | **PB-LEGACY-001** | 레거시 단일 HTML 앱 → Next.js App Router 마이그레이션 절차 | 단일 HTML/바닐라 앱을 Next.js로 전환할 때 | [pb-legacy-html-migration.md](file:///C:/Users/zipo1/workspace/budget-book/.agents/skills/knowledge-management/playbooks/pb-legacy-html-migration.md) | Active |
+| **PB-ARCH-001** | Server-Driven 초기 데이터 주입 및 320px 모바일 반응형 구현 가이드 | SSR 초기 하이드레이션 구축 및 모바일 반응형 최적화 시 | [pb-server-driven-hydration-and-responsive.md](file:///C:/Users/zipo1/workspace/budget-book/.agents/skills/knowledge-management/playbooks/pb-server-driven-hydration-and-responsive.md) | Active |
 
 
 

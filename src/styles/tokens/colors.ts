@@ -35,6 +35,16 @@ export const lightColors = {
   destructiveHover: "#DC3B40",
   destructiveForeground: "#FFFFFF",
   destructiveSubtle: "#FEECEE",
+
+  // Semantic (Finance — 수입/지출/저축/경고)
+  success: "#248A54",       // 수입, 양수 잔액
+  successSubtle: "#DCFCE7",
+  danger: "#DC2626",        // 지출, 음수 잔액
+  dangerSubtle: "#FEE2E2",
+  save: "#2563EB",          // 저축·투자
+  saveSubtle: "#DBEAFE",
+  warning: "#D97706",       // 순잔액 카드 강조
+  warningSubtle: "#FEF3C7",
 };
 
 export const darkColors = {
@@ -73,4 +83,14 @@ export const darkColors = {
   destructiveHover: "#F05A5F",
   destructiveForeground: "#FFFFFF",
   destructiveSubtle: "#381316",
+
+  // Semantic (Finance — 수입/지출/저축/경고)
+  success: "#34D399",       // 다크모드용 밝은 초록
+  successSubtle: "#064E3B",
+  danger: "#F87171",        // 다크모드용 밝은 빨강
+  dangerSubtle: "#7F1D1D",
+  save: "#60A5FA",          // 다크모드용 밝은 파랑
+  saveSubtle: "#1E3A5F",
+  warning: "#FBBF24",       // 다크모드용 밝은 주황
+  warningSubtle: "#78350F",
 };

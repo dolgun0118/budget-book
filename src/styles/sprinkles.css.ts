@@ -44,6 +44,8 @@ const responsiveProperties = defineProperties({
     position: ["static", "relative", "absolute", "fixed", "sticky"],
     overflow: ["visible", "hidden", "scroll", "auto"],
     borderRadius: vars.radii,
+    fontSize: vars.fontSize,
+    fontWeight: vars.fontWeight,
   },
   shorthands: {
     padding: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
@@ -70,7 +72,7 @@ const responsiveProperties = defineProperties({
   },
 });
 
-// 2. 색상, 테두리, 타이포그래피 프로퍼티
+// 2. 색상, 테두리, 기타 프로퍼티
 const colorProperties = defineProperties({
   properties: {
     color: vars.color,
@@ -79,8 +81,6 @@ const colorProperties = defineProperties({
     borderColor: vars.color,
     borderWidth: ["0", "1px", "2px", "4px"],
     borderStyle: ["none", "solid", "dashed", "dotted"],
-    fontSize: vars.fontSize,
-    fontWeight: vars.fontWeight,
     lineHeight: vars.lineHeight,
     cursor: ["default", "pointer", "not-allowed"],
     userSelect: ["none", "auto", "text"],

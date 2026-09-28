@@ -1,164 +1,118 @@
 "use client";
 
-import { useState, useMemo, useCallback, useSyncExternalStore } from "react";
-import { Entry, MajorCategory, CATEGORY_MAP, LedgerTotals } from "@/types/ledger";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { Entry, LedgerTotals, CategoryMap } from "@/types/ledger";
+import { AppInitialConfig } from "@/types/config";
+import { supabase } from "@/lib/supabase";
+import {
+  LEDGER_TABLE,
+  LEDGER_REALTIME_CHANNEL,
+  ALL_MONTHS_KEY,
+  getDateYearsAgo,
+  getMonthRange,
+} from "@/config/ledger.config";
+import { normalizeEntry } from "@/services/ledgerServerService";
 
-const STORAGE_KEY = "budget_book_entries";
-
-const INITIAL_ENTRIES: Entry[] = [
-  {
-    id: "seed-1",
-    date: "2026-09-01",
-    major: "income",
-    sub: "mine",
-    item: "9월 급여",
-    amount: 3500000,
-  },
-  {
-    id: "seed-2",
-    date: "2026-09-02",
-    major: "income",
-    sub: "spouse",
-    item: "배우자 급여",
-    amount: 3200000,
-  },
-  {
-    id: "seed-3",
-    date: "2026-09-05",
-    major: "common",
-    sub: "fixed",
-    item: "아파트 관리비",
-    amount: 280000,
-  },
-  {
-    id: "seed-4",
-    date: "2026-09-06",
-    major: "common",
-    sub: "variable",
-    item: "주말 마트 장보기",
-    amount: 145000,
-  },
-  {
-    id: "seed-5",
-    date: "2026-09-08",
-    major: "personal",
-    sub: "mine",
-    item: "교통비 충전",
-    amount: 65000,
-  },
-  {
-    id: "seed-6",
-    date: "2026-09-09",
-    major: "personal",
-    sub: "spouse",
-    item: "도서 구입",
-    amount: 38000,
-  },
-  {
-    id: "seed-7",
-    date: "2026-09-10",
-    major: "savings",
-    sub: "common",
-    item: "주택청약 및 주택자금 적금",
-    amount: 1500000,
-  },
-  {
-    id: "seed-8",
-    date: "2026-09-10",
-    major: "savings",
-    sub: "mine",
-    item: "개인연금저축",
-    amount: 300000,
-  },
-];
-
-let listeners: Array<() => void> = [];
-
-function emitChange() {
-  for (const listener of listeners) {
-    listener();
-  }
+interface UseLedgerProps {
+  initialConfig: AppInitialConfig;
+  initialEntries: Entry[];
 }
 
-function subscribe(listener: () => void) {
-  listeners = [...listeners, listener];
-  window.addEventListener("storage", listener);
-  return () => {
-    listeners = listeners.filter((l) => l !== listener);
-    window.removeEventListener("storage", listener);
-  };
-}
+export function useLedger({ initialConfig, initialEntries }: UseLedgerProps) {
+  const [entries, setEntries] = useState<Entry[]>(initialEntries);
+  const [availableMonths, setAvailableMonths] = useState<string[]>(
+    initialConfig.dateFilter.availableMonths
+  );
+  const [categoryMap] = useState<CategoryMap>(initialConfig.categoryMap);
+  const [isLoaded] = useState(true); // 서버에서 초기 주입받으므로 즉시 loaded 상태
+  const [currentMonth, setCurrentMonth] = useState<string>(
+    initialConfig.dateFilter.defaultMonth
+  );
 
-function getSnapshot(): string {
-  if (typeof window === "undefined") {
-    return JSON.stringify(INITIAL_ENTRIES);
-  }
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_ENTRIES));
-    return JSON.stringify(INITIAL_ENTRIES);
-  }
-  return saved;
-}
-
-function getServerSnapshot(): string {
-  return JSON.stringify(INITIAL_ENTRIES);
-}
-
-export function useLedger() {
-  const [currentMonth, setCurrentMonth] = useState<string>("all");
-
-  const rawEntries = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-
-  const entries: Entry[] = useMemo(() => {
+  // ── 월 목록 최신화 (Realtime 등 발생 시) ──────────────────────────────────
+  const refreshAvailableMonths = useCallback(async () => {
     try {
-      return JSON.parse(rawEntries);
-    } catch {
-      return INITIAL_ENTRIES;
-    }
-  }, [rawEntries]);
+      const { data, error } = await supabase
+        .from(LEDGER_TABLE)
+        .select("date")
+        .order("date", { ascending: false });
 
-  // 변경 사항 LocalStorage 동기화
-  const persistEntries = useCallback((newEntries: Entry[]) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newEntries));
-      emitChange();
+      if (!error && data) {
+        const months = Array.from(
+          new Set(data.map((row: { date: string }) => row.date.slice(0, 7)).filter(Boolean))
+        ).sort().reverse() as string[];
+        setAvailableMonths(months);
+      }
     } catch (err) {
-      console.error("가계부 데이터 저장 실패:", err);
+      console.error("월 목록 로드 실패:", err);
     }
   }, []);
 
-  // 월 추출 헬퍼 (YYYY-MM)
-  const monthOf = useCallback((dateStr: string) => {
-    return dateStr ? dateStr.slice(0, 7) : "";
+  // ── 특정 월 or 기본 기간 데이터 로드 ────────────────────────────────────────
+  const loadEntries = useCallback(async (month: string) => {
+    try {
+      let query = supabase
+        .from(LEDGER_TABLE)
+        .select("*")
+        .order("date", { ascending: false });
+
+      if (month === ALL_MONTHS_KEY) {
+        // 전체 내역: 기본 조회 기간(1년) 적용
+        query = query.gte("date", getDateYearsAgo());
+      } else {
+        // 특정 월: 해당 월의 시작일~종료일만 조회
+        const { from, to } = getMonthRange(month);
+        query = query.gte("date", from).lte("date", to);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Supabase 데이터 조회 오류:", error.message);
+        setEntries([]);
+      } else if (data) {
+        setEntries(data.map(normalizeEntry));
+      }
+    } catch (err) {
+      console.error("데이터 로드 실패:", err);
+      setEntries([]);
+    }
   }, []);
 
-  // 사용 가능한 월 목록
-  const availableMonths = useMemo(() => {
-    const months = Array.from(
-      new Set(entries.map((e) => monthOf(e.date)).filter(Boolean))
-    ).sort().reverse();
-    return months;
-  }, [entries, monthOf]);
+  // ── Realtime 구독 ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    const channel = supabase
+      .channel(LEDGER_REALTIME_CHANNEL)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: LEDGER_TABLE },
+        () => {
+          // 실시간 변경 발생 시 월 목록 및 현재 월 내역 갱신
+          refreshAvailableMonths();
+          loadEntries(currentMonth);
+        }
+      )
+      .subscribe();
 
-  // 필터링된 내역
-  const filteredEntries = useMemo(() => {
-    if (currentMonth === "all") return entries;
-    return entries.filter((e) => monthOf(e.date) === currentMonth);
-  }, [entries, currentMonth, monthOf]);
-
-  // 합계 계산
-  const totals: LedgerTotals = useMemo(() => {
-    const res = {
-      income: 0,
-      common: 0,
-      personal: 0,
-      savings: 0,
-      totalExpense: 0,
-      balance: 0,
+    return () => {
+      supabase.removeChannel(channel);
     };
+  }, [refreshAvailableMonths, loadEntries, currentMonth]);
 
-    filteredEntries.forEach((e) => {
+  // ── 월 변경 시 해당 월 데이터를 새로 fetch ───────────────────────────────────
+  const handleMonthChange = useCallback(
+    async (month: string) => {
+      setCurrentMonth(month);
+      await loadEntries(month);
+    },
+    [loadEntries]
+  );
+
+  // ─── 합계 계산 ──────────────────────────────────────────────────────────────
+  const totals: LedgerTotals = useMemo(() => {
+    const res = { income: 0, common: 0, personal: 0, savings: 0, totalExpense: 0, balance: 0 };
+
+    entries.forEach((e) => {
       if (e.major === "income") res.income += e.amount;
       else if (e.major === "common") res.common += e.amount;
       else if (e.major === "personal") res.personal += e.amount;
@@ -167,64 +121,111 @@ export function useLedger() {
 
     res.totalExpense = res.common + res.personal;
     res.balance = res.income - res.totalExpense - res.savings;
-
     return res;
-  }, [filteredEntries]);
+  }, [entries]);
 
-  // 소분류별 그룹화
+  // ─── 소분류별 그룹화 ─────────────────────────────────────────────────────────
   const groupedBySub = useMemo(() => {
-    const result: Record<MajorCategory, Record<string, Entry[]>> = {
-      income: {},
-      common: {},
-      personal: {},
-      savings: {},
-    };
+    const result: Record<string, Record<string, Entry[]>> = {};
 
-    (Object.keys(CATEGORY_MAP) as MajorCategory[]).forEach((major) => {
-      Object.keys(CATEGORY_MAP[major].subs).forEach((sub) => {
+    Object.keys(categoryMap).forEach((major) => {
+      result[major] = {};
+      Object.keys(categoryMap[major].subs).forEach((sub) => {
         result[major][sub] = [];
       });
     });
 
-    filteredEntries.forEach((e) => {
-      if (result[e.major] && result[e.major][e.sub]) {
-        result[e.major][e.sub].push(e);
-      }
+    entries.forEach((e) => {
+      if (!result[e.major]) result[e.major] = {};
+      if (!result[e.major][e.sub]) result[e.major][e.sub] = [];
+      result[e.major][e.sub].push(e);
     });
 
     return result;
-  }, [filteredEntries]);
+  }, [entries, categoryMap]);
 
-  // 내역 추가
-  const addEntry = useCallback(
-    (entry: Omit<Entry, "id">) => {
-      const newEntry: Entry = {
-        ...entry,
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-      };
-      persistEntries([newEntry, ...entries]);
-    },
-    [entries, persistEntries]
-  );
+  // ─── 단일 내역 추가 ──────────────────────────────────────────────────────────
+  const addEntry = useCallback(async (entry: Omit<Entry, "id">) => {
+    const payload = {
+      date: entry.date,
+      major: entry.major,
+      sub: entry.sub,
+      item: entry.item,
+      amount: Math.round(entry.amount),
+    };
 
-  // 내역 삭제
-  const deleteEntry = useCallback(
-    (id: string) => {
-      persistEntries(entries.filter((e) => e.id !== id));
-    },
-    [entries, persistEntries]
-  );
+    try {
+      const { data, error } = await supabase.from(LEDGER_TABLE).insert([payload]).select();
+
+      if (error) {
+        console.error("Supabase 저장 오류:", error.message);
+      } else if (data && data.length > 0) {
+        const created = normalizeEntry(data[0]);
+        setEntries((prev) => [created, ...prev.filter((e) => e.id !== created.id)]);
+      }
+    } catch (err) {
+      console.error("추가 실패:", err);
+    }
+  }, []);
+
+  // ─── 다중 내역 일괄 추가 ─────────────────────────────────────────────────────
+  const addEntries = useCallback(async (newItems: Array<Omit<Entry, "id">>) => {
+    if (!newItems || newItems.length === 0) return;
+
+    const payloads = newItems.map((item) => ({
+      date: item.date,
+      major: item.major,
+      sub: item.sub,
+      item: item.item,
+      amount: Math.round(item.amount),
+    }));
+
+    try {
+      const { data, error } = await supabase.from(LEDGER_TABLE).insert(payloads).select();
+
+      if (error) {
+        console.error("Supabase 일괄 저장 오류:", error.message);
+      } else if (data && data.length > 0) {
+        const created = data.map(normalizeEntry);
+        setEntries((prev) => {
+          const createdIds = new Set(created.map((c) => c.id));
+          return [...created, ...prev.filter((e) => !createdIds.has(e.id))];
+        });
+      }
+    } catch (err) {
+      console.error("일괄 추가 실패:", err);
+    }
+  }, []);
+
+  // ─── 내역 삭제 ───────────────────────────────────────────────────────────────
+  const deleteEntry = useCallback(async (id: string) => {
+    // 낙관적 업데이트 (Optimistic UI)
+    setEntries((prev) => prev.filter((e) => e.id !== id));
+
+    try {
+      const { error } = await supabase.from(LEDGER_TABLE).delete().eq("id", id);
+
+      if (error) {
+        console.warn("Supabase 삭제 오류:", error.message);
+      }
+    } catch (err) {
+      console.error("삭제 실패:", err);
+    }
+  }, []);
 
   return {
     entries,
-    filteredEntries,
-    isLoaded: true,
+    categoryMap,
+    filteredEntries: entries,
+    isLoaded,
     currentMonth,
-    setCurrentMonth,
+    setCurrentMonth: handleMonthChange,
     availableMonths,
     totals,
     groupedBySub,
     addEntry,
+    addEntries,
     deleteEntry,
+    refetch: () => loadEntries(currentMonth),
   };
 }

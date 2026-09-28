@@ -3,7 +3,7 @@
 > **지식 ID**: KN-BIZ-001  
 > **카테고리**: 비즈니스 | 도메인  
 > **최초 등록일**: 2026-09-11  
-> **최종 갱신일**: 2026-09-11  
+> **최종 갱신일**: 2026-09-20  
 > **검증 상태**: Verified (검증됨)  
 > **관련 키워드**: `#domain-model`, `#category-system`, `#ledger`, `#budget`  
 
@@ -21,10 +21,10 @@ Budget Book 서비스의 핵심 비즈니스 도메인인 **부부 공동 가계
 #### 4대 대분류 체계
 | 대분류 Key | 레이블 | 타입 | 소분류 |
 | :--- | :--- | :--- | :--- |
-| `income` | 수입내역 | income | `mine` (내 수입), `spouse` (배우자 수입) |
+| `income` | 수입내역 | income | `donggun` (동건), `dabin` (다빈) |
 | `common` | 공동생활비 | expense | `fixed` (고정비), `variable` (변동비) |
-| `personal` | 개인생활비 | expense | `mine` (나), `spouse` (배우자) |
-| `savings` | 저축·투자 | save | `common` (공동 저축), `mine` (개인 저축) |
+| `personal` | 개인생활비 | expense | `donggun` (동건), `dabin` (다빈) |
+| `savings` | 저축·투자 | save | `common` (공동 저축), `donggun` (동건), `dabin` (다빈) |
 
 #### 순잔액 계산 공식
 ```
@@ -50,9 +50,9 @@ interface Entry {
 - 초기 시드 데이터 8건으로 앱 최초 실행 시 빈 화면 방지
 
 ### 2.3 Decision (의사결정)
-- **저장소**: 서버 없이 동작하는 브라우저 `localStorage` 채택 (단계적 서버 전환 가능하도록 `useLedger` 훅으로 추상화)
+- **저장소**: Supabase PostgreSQL (`ledger_entries` 테이블) 실시간 클라우드 DB 채택 및 `useLedger` 훅 연동 (오프라인 시 LocalStorage Fallback)
 - **월별 필터**: YYYY-MM 슬라이싱으로 월 식별 → `"all"` 값이면 전체 내역 표시
-- **ID 생성**: `Date.now().toString(36) + Math.random().toString(36).slice(2,7)` 조합으로 충돌 방지 UUID 대체
+- **ID 생성**: Supabase UUID 자동 생성 (`id: uuid primary key`)
 
 ### 2.4 Lesson (도출된 교훈)
 - 도메인 분류 체계를 `CATEGORY_MAP` 단일 상수로 관리하면 대분류 변경 시 UI 전체가 자동 반응하여 유지보수 비용이 크게 줄어듭니다.
@@ -63,8 +63,11 @@ interface Entry {
 ## 3. 연관 문서 및 플레이북
 - [PB-LEGACY-001: 레거시 HTML → Next.js 마이그레이션 플레이북](file:///C:/Users/zipo1/workspace/budget-book/.agents/skills/knowledge-management/playbooks/pb-legacy-html-migration.md)
 - 도메인 타입 소스: [src/types/ledger.ts](file:///C:/Users/zipo1/workspace/budget-book/src/types/ledger.ts)
+- Supabase 클라이언트: [src/lib/supabase.ts](file:///C:/Users/zipo1/workspace/budget-book/src/lib/supabase.ts)
 
 ---
 
 ## 5. 변경 이력 (Changelog)
+- **2026-09-20**: Supabase DB (`ledger_entries`) 연동 및 실시간 동기화 지원
+- **2026-09-20**: 수입/개인생활비/저축 소분류를 원본 도메인에 맞추어 `mine/spouse`(나/배우자)에서 `donggun/dabin`(동건/다빈)으로 복원
 - **2026-09-11**: 최초 작성 (우리집가계부.html → Next.js 마이그레이션 과정에서 도메인 모델 확정)

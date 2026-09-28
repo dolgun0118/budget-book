@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Select } from "@/components/ui";
+import { APP_LOGO_TEXT, APP_DISPLAY_NAME, APP_SUBTITLE } from "@/config/app.config";
 
 interface LedgerHeaderProps {
   currentMonth: string;
@@ -17,9 +18,10 @@ export function LedgerHeader({
     <Box
       as="header"
       display="flex"
-      flexDirection="row"
+      flexDirection={{ mobile: "column", tablet: "row" }}
       justifyContent="space-between"
-      alignItems="center"
+      alignItems={{ mobile: "flex-start", tablet: "center" }}
+      gap="3"
       width="100%"
       pb="4"
       borderWidth="1px"
@@ -27,7 +29,7 @@ export function LedgerHeader({
       borderColor="border"
       style={{ borderTop: "none", borderLeft: "none", borderRight: "none" }}
     >
-      <Box display="flex" alignItems="center" gap="3">
+      <Box display="flex" alignItems="center" gap="3" width="100%">
         <Box
           bg="primary"
           color="primaryForeground"
@@ -39,25 +41,25 @@ export function LedgerHeader({
           justifyContent="center"
           fontWeight="bold"
           fontSize="lg"
-          style={{ width: "42px", height: "42px", letterSpacing: "-0.5px" }}
+          style={{ width: "42px", height: "42px", minWidth: "42px", letterSpacing: "-0.5px" }}
         >
-          BB
+          {APP_LOGO_TEXT}
         </Box>
-        <Box display="flex" flexDirection="column">
-          <Box fontSize="2xl" fontWeight="bold" color="text">
-            우리집 가계부
+        <Box display="flex" flexDirection="column" style={{ minWidth: 0, flex: 1 }}>
+          <Box fontSize={{ mobile: "xl", tablet: "2xl" }} fontWeight="bold" color="text">
+            {APP_DISPLAY_NAME}
           </Box>
-          <Box fontSize="xs" color="textMuted">
-            부부가 함께 투명하게 기록하고 관리하는 공동 자산 장부
+          <Box fontSize="xs" color="textMuted" style={{ wordBreak: "keep-all" }}>
+            {APP_SUBTITLE}
           </Box>
         </Box>
       </Box>
 
-      <Box display="flex" alignItems="center" gap="2">
-        <Box as="span" fontSize="sm" color="textMuted" fontWeight="medium">
+      <Box display="flex" alignItems="center" gap="2" width={{ mobile: "100%", tablet: "fit-content" }} justifyContent={{ mobile: "flex-end", tablet: "flex-start" }}>
+        <Box as="span" fontSize="sm" color="textMuted" fontWeight="medium" style={{ whiteSpace: "nowrap" }}>
           월별 보기:
         </Box>
-        <Box width="fit-content">
+        <Box width={{ mobile: "100%", tablet: "fit-content" }} style={{ maxWidth: "160px" }}>
           <Select
             size="sm"
             value={currentMonth}
