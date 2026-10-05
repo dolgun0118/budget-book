@@ -29,6 +29,7 @@ export function LedgerApp({ initialConfig, initialEntries }: LedgerAppProps) {
     groupedBySub,
     addEntries,
     deleteEntry,
+    updateEntry,
   } = useLedger({ initialConfig, initialEntries });
 
   return (
@@ -93,11 +94,12 @@ export function LedgerApp({ initialConfig, initialEntries }: LedgerAppProps) {
           onAddEntries={addEntries}
         />
 
-        {/* 5. 원본 데이터 테이블 & 삭제 관리 */}
+        {/* 5. 원본 데이터 테이블 & 삭제/수정 관리 */}
         <LedgerTable
           entries={filteredEntries}
           categoryMap={categoryMap}
           onDeleteEntry={deleteEntry}
+          onUpdateEntry={updateEntry}
         />
       </Box>
     </Box>

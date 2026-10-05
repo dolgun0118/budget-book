@@ -19,10 +19,9 @@ interface LedgerEntryFormProps {
   onAddEntries: (entries: Array<Omit<Entry, "id">>) => void;
 }
 
-function createDefaultRow(date?: string, map?: CategoryMap): FormRow {
-  const currentMap = map || CATEGORY_MAP;
-  const firstMajor = (Object.keys(currentMap)[0] as MajorCategory) || "income";
-  const firstSub = Object.keys(currentMap[firstMajor]?.subs || {})[0] || "donggun";
+function createDefaultRow(date?: string): FormRow {
+  const firstMajor = "common";
+  const firstSub = "fixed";
 
   return {
     id:
@@ -46,7 +45,7 @@ export function LedgerEntryForm({
   onAddEntries,
 }: LedgerEntryFormProps) {
   const map = categoryMap || CATEGORY_MAP;
-  const [rows, setRows] = useState<FormRow[]>([createDefaultRow(undefined, map)]);
+  const [rows, setRows] = useState<FormRow[]>(Array.from({ length: FORM_DEFAULT_ADD_ROW_COUNT }, () => createDefaultRow()));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -56,7 +55,7 @@ export function LedgerEntryForm({
     setSuccessMessage(null);
     const lastRowDate = rows.length > 0 ? rows[rows.length - 1].date : undefined;
     const newRows = Array.from({ length: count }, () =>
-      createDefaultRow(lastRowDate, map)
+      createDefaultRow(lastRowDate)
     );
     setRows((prev) => [...prev, ...newRows]);
   };
@@ -67,7 +66,7 @@ export function LedgerEntryForm({
     setSuccessMessage(null);
     setRows((prev) => {
       const filtered = prev.filter((r) => r.id !== id);
-      return filtered.length > 0 ? filtered : [createDefaultRow(undefined, map)];
+      return filtered.length > 0 ? filtered : [createDefaultRow()];
     });
   };
 
@@ -105,7 +104,7 @@ export function LedgerEntryForm({
   const handleReset = () => {
     setErrorMessage(null);
     setSuccessMessage(null);
-    setRows([createDefaultRow(undefined, map)]);
+    setRows(Array.from({ length: FORM_DEFAULT_ADD_ROW_COUNT }, () => createDefaultRow()));
   };
 
   // 전체 저장
@@ -158,7 +157,7 @@ export function LedgerEntryForm({
     // 일괄 저장 실행
     onAddEntries(validEntries);
     setSuccessMessage(`총 ${validEntries.length}건의 내역이 성공적으로 저장되었습니다.`);
-    setRows([createDefaultRow()]);
+    setRows(Array.from({ length: FORM_DEFAULT_ADD_ROW_COUNT }, () => createDefaultRow()));
   };
 
   // 현재 입력 중인 유효 항목 미리보기 계산
@@ -242,7 +241,6 @@ export function LedgerEntryForm({
 
       {/* 다중 행 입력 테이블/그리드 */}
       <Box
-        overflow="hidden"
         rounded="xl"
         borderWidth="1px"
         borderStyle="solid"
@@ -301,6 +299,9 @@ export function LedgerEntryForm({
                 <td style={{ padding: "8px 10px", width: "145px", minWidth: "140px", whiteSpace: "nowrap" }}>
                   <Input
                     type="date"
+                    lang="ko-KR"
+                    min={'1990-01-01'}
+                    max={'2999-12-31'}
                     value={row.date}
                     onChange={(e) =>
                       handleRowChange(row.id, "date", e.target.value)

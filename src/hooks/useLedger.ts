@@ -213,6 +213,36 @@ export function useLedger({ initialConfig, initialEntries }: UseLedgerProps) {
     }
   }, []);
 
+  // ─── 내역 수정 ───────────────────────────────────────────────────────────────
+  const updateEntry = useCallback(async (updated: Entry) => {
+    // 낙관적 업데이트 (Optimistic UI)
+    setEntries((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+
+    const payload = {
+      date: updated.date,
+      major: updated.major,
+      sub: updated.sub,
+      item: updated.item,
+      amount: Math.round(updated.amount),
+    };
+
+    try {
+      const { error } = await supabase
+        .from(LEDGER_TABLE)
+        .update(payload)
+        .eq("id", updated.id);
+
+      if (error) {
+        console.warn("Supabase 수정 오류:", error.message);
+        // 실패 시 원본 복원을 위해 refetch
+        loadEntries(currentMonth);
+      }
+    } catch (err) {
+      console.error("수정 실패:", err);
+      loadEntries(currentMonth);
+    }
+  }, [currentMonth, loadEntries]);
+
   return {
     entries,
     categoryMap,
@@ -226,6 +256,7 @@ export function useLedger({ initialConfig, initialEntries }: UseLedgerProps) {
     addEntry,
     addEntries,
     deleteEntry,
+    updateEntry,
     refetch: () => loadEntries(currentMonth),
   };
 }

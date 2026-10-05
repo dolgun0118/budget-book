@@ -59,7 +59,7 @@ export function LedgerHeader({
         <Box as="span" fontSize="sm" color="textMuted" fontWeight="medium" style={{ whiteSpace: "nowrap" }}>
           월별 보기:
         </Box>
-        <Box width={{ mobile: "100%", tablet: "fit-content" }} style={{ maxWidth: "160px" }}>
+        <Box width={{ mobile: "100%", tablet: "fit-content" }} style={{ width: "96px" }} >
           <Select
             size="sm"
             value={currentMonth}

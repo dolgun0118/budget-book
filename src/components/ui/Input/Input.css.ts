@@ -1,4 +1,5 @@
 import { recipe, RecipeVariants } from "@vanilla-extract/recipes";
+import { globalStyle } from "@vanilla-extract/css";
 import { vars } from "@/styles/theme.css";
 
 export const inputRecipe = recipe({
@@ -48,3 +49,10 @@ export const inputRecipe = recipe({
 });
 
 export type InputVariants = RecipeVariants<typeof inputRecipe>;
+
+// ── date input 달력 아이콘 ────────────────────────────────────────────────────
+
+globalStyle("input[type='date']::-webkit-calendar-picker-indicator", {
+  cursor: "pointer",
+  filter: "brightness(0)",
+});

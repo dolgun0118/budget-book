@@ -19,10 +19,8 @@ export const DEFAULT_CATEGORY_MAP: Record<string, CategoryInfo> = {
     label: "수입내역",
     type: "income",
     subs: {
-      donggun: "다빈",
-      dabin: "동건",
-      mine: "다빈",
-      spouse: "동건",
+      dabin: "다빈",
+      dongeon: "동건",
       refund: "환급/기타",
     },
   },
@@ -46,10 +44,8 @@ export const DEFAULT_CATEGORY_MAP: Record<string, CategoryInfo> = {
     label: "개인생활비",
     type: "expense",
     subs: {
-      donggun: "동건",
+      dongeon: "동건",
       dabin: "다빈",
-      mine: "동건",
-      spouse: "다빈",
     },
   },
   savings: {
@@ -57,10 +53,8 @@ export const DEFAULT_CATEGORY_MAP: Record<string, CategoryInfo> = {
     type: "save",
     subs: {
       common: "공동 저축",
-      donggun: "동건",
+      dongeon: "동건",
       dabin: "다빈",
-      mine: "동건",
-      spouse: "다빈",
     },
   },
 };
