@@ -364,14 +364,12 @@ export function LedgerEntryForm({
                 {/* 5. 금액 */}
                 <td style={{ padding: "8px 10px" }}>
                   <Input
-                    type="number"
                     placeholder="0"
-                    min="0"
-                    step="1"
                     value={row.amount}
-                    onChange={(e) =>
-                      handleRowChange(row.id, "amount", e.target.value)
-                    }
+                    onChange={(e) => {
+                      const cleaned = e.target.value.replace(/[^0-9]/g, "");
+                      handleRowChange(row.id, "amount", cleaned);
+                    }}
                     style={{ height: "36px", fontSize: "13px" }}
                   />
                 </td>

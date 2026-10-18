@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Select } from "@/components/ui";
+import Link from "next/link";
+import { Box, Button, Select } from "@/components/ui";
 import { APP_LOGO_TEXT, APP_DISPLAY_NAME, APP_SUBTITLE } from "@/config/app.config";
 
 interface LedgerHeaderProps {
@@ -73,6 +74,11 @@ export function LedgerHeader({
             ))}
           </Select>
         </Box>
+        <Link href="/categories">
+          <Button type="button" variant="outline" size="sm" style={{ whiteSpace: "nowrap" }}>
+            ⚙ 카테고리
+          </Button>
+        </Link>
       </Box>
     </Box>
   );

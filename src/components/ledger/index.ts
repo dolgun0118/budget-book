@@ -4,3 +4,4 @@ export * from "./LedgerPanel";
 export * from "./LedgerEntryForm";
 export * from "./LedgerTable";
 export * from "./LedgerApp";
+export * from "./ColumnHeaderFilter";
