@@ -24,6 +24,14 @@ export const DEFAULT_CATEGORY_MAP: Record<string, CategoryInfo> = {
       refund: "환급/기타",
     },
   },
+  specially_fixed: {
+    "label": "특별고정비",
+    "type": "expense",
+    "subs": {
+      "loan": "대출/금융",
+      "medical": "의료/건강",
+    }
+  },
   common: {
     label: "공동생활비",
     type: "expense",

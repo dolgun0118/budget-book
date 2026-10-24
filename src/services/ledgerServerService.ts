@@ -48,7 +48,7 @@ interface SubRow {
 }
 
 function buildCategoryMap(majorsData: MajorRow[], subsData: SubRow[]): CategoryMap {
-  const map: CategoryMap = JSON.parse(JSON.stringify(DEFAULT_CATEGORY_MAP));
+  const map: CategoryMap = {};
 
   majorsData.forEach((m) => {
     if (!map[m.id]) {
