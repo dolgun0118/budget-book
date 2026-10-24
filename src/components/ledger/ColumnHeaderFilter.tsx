@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Box, Button, Input } from "@/components/ui";
+import { vars } from "@/styles/theme.css";
 
 export interface ColumnOption {
   value: string;
@@ -123,10 +124,10 @@ export function ColumnHeaderFilter({
       >
         <span>{title}</span>
         {isSortedAsc && (
-          <span style={{ fontSize: "11px", color: "var(--color-primary)" }}>▲</span>
+          <span style={{ fontSize: "11px", color: vars.color.primary }}>▲</span>
         )}
         {isSortedDesc && (
-          <span style={{ fontSize: "11px", color: "var(--color-primary)" }}>▼</span>
+          <span style={{ fontSize: "11px", color: vars.color.primary }}>▼</span>
         )}
       </Box>
 
@@ -138,15 +139,15 @@ export function ColumnHeaderFilter({
           onToggleOpen();
         }}
         style={{
-          background: hasFilter ? "var(--color-primarySubtle)" : "transparent",
-          border: hasFilter ? "1px solid var(--color-primary)" : "1px solid transparent",
+          background: hasFilter ? vars.color.primarySubtle : "transparent",
+          border: hasFilter ? `1px solid ${vars.color.primary}` : "1px solid transparent",
           borderRadius: "4px",
           padding: "2px 4px",
           cursor: "pointer",
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          color: hasFilter ? "var(--color-primary)" : "var(--color-textMuted)",
+          color: hasFilter ? vars.color.primary : vars.color.textMuted,
           fontSize: "11px",
           marginLeft: "2px",
         }}
@@ -190,7 +191,7 @@ export function ColumnHeaderFilter({
           onClick={(e) => e.stopPropagation()}
         >
           {/* 1. 정렬 버튼 그룹 */}
-          <Box display="flex" flexDirection="column" gap="1" pb="2" style={{ borderBottom: "1px solid var(--color-border)" }}>
+          <Box display="flex" flexDirection="column" gap="1" pb="2" style={{ borderBottom: `1px solid ${vars.color.border}` }}>
             <Box fontSize="xs" fontWeight="semibold" color="textMuted" style={{ marginBottom: "2px" }}>
               정렬
             </Box>
@@ -233,7 +234,7 @@ export function ColumnHeaderFilter({
                     background: "none",
                     border: "none",
                     fontSize: "11px",
-                    color: "var(--color-primary)",
+                    color: vars.color.primary,
                     cursor: "pointer",
                     padding: 0,
                   }}
@@ -259,7 +260,7 @@ export function ColumnHeaderFilter({
                     }}
                     style={{ height: "30px", fontSize: "12px" }}
                   />
-                  <span style={{ fontSize: "12px", color: "var(--color-textMuted)" }}>~</span>
+                  <span style={{ fontSize: "12px", color: vars.color.textMuted }}>~</span>
                   <Input
                     type="text"
                     placeholder="최대 금액"
@@ -342,7 +343,7 @@ export function ColumnHeaderFilter({
                             cursor: "pointer",
                             padding: "2px 4px",
                             borderRadius: "4px",
-                            backgroundColor: checked && selectedValues.length > 0 ? "var(--color-primarySubtle)" : "transparent",
+                            backgroundColor: checked && selectedValues.length > 0 ? vars.color.primarySubtle : "transparent",
                           }}
                         >
                           <Box display="flex" alignItems="center" gap="1.5" style={{ minWidth: 0, flex: 1 }}>
@@ -363,7 +364,7 @@ export function ColumnHeaderFilter({
                               {opt.label}
                             </span>
                           </Box>
-                          <span style={{ fontSize: "10px", color: "var(--color-textMuted)", marginLeft: "4px" }}>
+                          <span style={{ fontSize: "10px", color: vars.color.textMuted, marginLeft: "4px" }}>
                             {opt.count}
                           </span>
                         </label>
@@ -376,7 +377,7 @@ export function ColumnHeaderFilter({
           </Box>
 
           {/* 3. 하단 닫기/확인 버튼 */}
-          <Box pt="2" mt="2" style={{ borderTop: "1px solid var(--color-border)" }} display="flex" justifyContent="flex-end">
+          <Box pt="2" mt="2" style={{ borderTop: `1px solid ${vars.color.border}` }} display="flex" justifyContent="flex-end">
             <Button
               type="button"
               size="sm"

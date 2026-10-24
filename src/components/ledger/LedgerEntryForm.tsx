@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Box, Button, Input, Select, Badge } from "@/components/ui";
+import { vars } from "@/styles/theme.css";
 import { MajorCategory, CATEGORY_MAP, Entry, CategoryMap } from "@/types/ledger";
 import { FORM_DEFAULT_ADD_ROW_COUNT, TABLE_MIN_WIDTH } from "@/config/ui.config";
 
@@ -180,7 +181,7 @@ export function LedgerEntryForm({
       borderWidth="1px"
       borderStyle="solid"
       borderColor="border"
-      style={{ borderLeft: "4px solid var(--color-primary)" }}
+      style={{ borderLeft: `4px solid ${vars.color.primary}` }}
       display="flex"
       flexDirection="column"
       gap="4"
@@ -221,7 +222,9 @@ export function LedgerEntryForm({
           bg="surfaceSubtle"
           fontSize="xs"
           color="destructive"
-          style={{ border: "1px solid var(--color-destructive)" }}
+          borderWidth="1px"
+          borderStyle="solid"
+          borderColor="destructive"
         >
           ⚠️ {errorMessage}
         </Box>
@@ -233,7 +236,10 @@ export function LedgerEntryForm({
           rounded="lg"
           bg="surfaceSubtle"
           fontSize="xs"
-          style={{ color: "var(--color-success)", border: "1px solid var(--color-success)" }}
+          color="success"
+          borderWidth="1px"
+          borderStyle="solid"
+          borderColor="success"
         >
           ✓ {successMessage}
         </Box>
@@ -259,9 +265,9 @@ export function LedgerEntryForm({
           <thead>
             <tr
               style={{
-                backgroundColor: "var(--color-secondary)",
-                color: "var(--color-text)",
-                borderBottom: "1px solid var(--color-border)",
+                backgroundColor: vars.color.surfaceSubtle,
+                color: vars.color.text,
+                borderBottom: `1px solid ${vars.color.border}`,
               }}
             >
               <th style={{ padding: "10px 12px", fontWeight: 600, width: "145px", minWidth: "140px", whiteSpace: "nowrap" }}>
@@ -291,7 +297,7 @@ export function LedgerEntryForm({
                 style={{
                   borderBottom:
                     index < rows.length - 1
-                      ? "1px solid var(--color-border)"
+                      ? `1px solid ${vars.color.border}`
                       : "none",
                 }}
               >
@@ -385,7 +391,7 @@ export function LedgerEntryForm({
                       padding: "0",
                       width: "28px",
                       height: "28px",
-                      color: "var(--color-text-muted)",
+                      color: vars.color.textMuted,
                       borderRadius: "6px",
                     }}
                     title="행 삭제"
@@ -418,7 +424,7 @@ export function LedgerEntryForm({
             + 행 추가
           </Button>
           <Box fontSize="xs" color="textMuted">
-            입력 예정: <strong style={{ color: "var(--color-text)" }}>{validCount}건</strong>
+            입력 예정: <strong style={{ color: vars.color.text }}>{validCount}건</strong>
             {validCount > 0 && ` (${formatWon(validTotal)})`}
           </Box>
         </Box>

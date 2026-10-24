@@ -8,7 +8,7 @@ export const lightColors = {
   primarySubtle: "#EBF4FD",
   primarySubtleHover: "#DCECFB",
 
-  // Secondary & Accents
+  // Secondary & Accents (Button, Badge 등 보조 인터랙션/액션 전용 토큰. 테이블 헤더나 카드 배경 등 서피스에는 surface/surfaceSubtle 사용)
   secondary: "#F0F4F8",
   secondaryHover: "#E2EAF2",
   secondaryForeground: "#1E2F40",
@@ -56,7 +56,7 @@ export const darkColors = {
   primarySubtle: "#132B45",
   primarySubtleHover: "#1A3A5E",
 
-  // Secondary & Accents
+  // Secondary & Accents (Button, Badge 등 보조 인터랙션/액션 전용 토큰. 테이블 헤더나 카드 배경 등 서피스에는 surface/surfaceSubtle 사용)
   secondary: "#1E293B",
   secondaryHover: "#2C3B4E",
   secondaryForeground: "#E2E8F0",

@@ -1,6 +1,7 @@
 "use client";
 
 import { Box } from "@/components/ui";
+import { vars } from "@/styles/theme.css";
 import { LedgerTotals } from "@/types/ledger";
 
 interface LedgerSummaryProps {
@@ -29,7 +30,7 @@ export function LedgerSummary({ totals }: LedgerSummaryProps) {
         borderWidth="1px"
         borderStyle="solid"
         borderColor="border"
-        style={{ borderTop: "4px solid var(--color-success)" }}
+        style={{ borderTop: `4px solid ${vars.color.success}` }}
         display="flex"
         flexDirection="column"
         gap="1.5"
@@ -55,7 +56,7 @@ export function LedgerSummary({ totals }: LedgerSummaryProps) {
         borderWidth="1px"
         borderStyle="solid"
         borderColor="border"
-        style={{ borderTop: "4px solid var(--color-danger)" }}
+        style={{ borderTop: `4px solid ${vars.color.danger}` }}
         display="flex"
         flexDirection="column"
         gap="1.5"
@@ -81,7 +82,7 @@ export function LedgerSummary({ totals }: LedgerSummaryProps) {
         borderWidth="1px"
         borderStyle="solid"
         borderColor="border"
-        style={{ borderTop: "4px solid var(--color-primary)" }}
+        style={{ borderTop: `4px solid ${vars.color.primary}` }}
         display="flex"
         flexDirection="column"
         gap="1.5"
@@ -107,7 +108,7 @@ export function LedgerSummary({ totals }: LedgerSummaryProps) {
         borderWidth="1px"
         borderStyle="solid"
         borderColor="border"
-        style={{ borderTop: "4px solid var(--color-warning)" }}
+        style={{ borderTop: `4px solid ${vars.color.warning}` }}
         display="flex"
         flexDirection="column"
         gap="1.5"
@@ -119,7 +120,7 @@ export function LedgerSummary({ totals }: LedgerSummaryProps) {
           fontSize={{ mobile: "lg", tablet: "2xl" }}
           fontWeight="bold"
           style={{
-            color: totals.balance >= 0 ? "var(--color-text)" : "var(--color-danger)",
+            color: totals.balance >= 0 ? vars.color.text : vars.color.danger,
             fontVariantNumeric: "tabular-nums",
             wordBreak: "break-all",
           }}

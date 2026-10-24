@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Box, Badge } from "@/components/ui";
+import { vars } from "@/styles/theme.css";
 import { CATEGORY_MAP, Entry, CategoryInfo } from "@/types/ledger";
 import { SUBCATEGORY_COLOR_PALETTE, PANEL_EMPTY_SUB_PREVIEW_COUNT } from "@/config/ui.config";
 
@@ -69,7 +70,7 @@ export function LedgerPanel({
         cursor="pointer"
         onClick={() => setIsOpen(!isOpen)}
         style={{
-          borderBottom: isOpen ? "1px solid var(--color-border)" : "none",
+          borderBottom: isOpen ? `1px solid ${vars.color.border}` : "none",
           transition: "background-color 0.15s ease",
         }}
       >

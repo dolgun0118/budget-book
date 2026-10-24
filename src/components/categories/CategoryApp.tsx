@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Box, Button } from "@/components/ui";
+import { vars } from "@/styles/theme.css";
 import { useCategories } from "@/hooks/useCategories";
 import { MajorRow, SubRow } from "@/services/categoryService";
 import { CategoryType } from "@/types/ledger";
@@ -135,10 +136,12 @@ export function CategoryApp({ initialMajors, initialSubs }: CategoryAppProps) {
             bg="surfaceSubtle"
             fontSize="sm"
             color="destructive"
+            borderWidth="1px"
+            borderStyle="solid"
+            borderColor="destructive"
             display="flex"
             justifyContent="space-between"
             alignItems="center"
-            style={{ border: "1px solid var(--color-destructive)" }}
           >
             <span>⚠️ {error}</span>
             <Button type="button" variant="ghost" size="sm" onClick={clearError}>
@@ -172,7 +175,7 @@ export function CategoryApp({ initialMajors, initialSubs }: CategoryAppProps) {
             borderStyle="solid"
             borderColor="border"
             style={{
-              borderLeft: "4px solid var(--color-primary)",
+              borderLeft: `4px solid ${vars.color.primary}`,
               flex: "0 0 340px",
               minWidth: "260px",
             }}
@@ -215,7 +218,7 @@ export function CategoryApp({ initialMajors, initialSubs }: CategoryAppProps) {
             borderStyle="solid"
             borderColor="border"
             style={{
-              borderLeft: "4px solid var(--color-secondary)",
+              borderLeft: `4px solid ${vars.color.border}`,
               flex: 1,
               minWidth: 0,
             }}

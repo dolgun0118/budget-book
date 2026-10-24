@@ -47,7 +47,7 @@
    - `SUBCATEGORY_COLOR_PALETTE` (중복 선언되었던 인라인 컬러 배열 통합)
 3. **디자인 토큰 시스템 확장**: `src/styles/tokens/colors.ts`
    - 인라인 HEX 대신 시맨틱 토큰 추가: `success`, `danger`, `save`, `warning`
-   - 컴포넌트에서는 `var(--color-*)` CSS 변수를 참조하도록 전환
+   - 컴포넌트에서는 `var(--color-*)` 임의 문자열 대신 Vanilla-Extract의 `vars.color.*` 또는 `<Box>` Sprinkles props(`bg`, `color`, `borderColor` 등)를 참조하도록 표준화
 
 ## Step 3: Server-Driven Initial Config & Hydration 서비스 구축
 1. **타입 정의 (`src/types/config.ts`)**:

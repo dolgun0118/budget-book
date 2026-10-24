@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Box, Badge, Button, Input } from "@/components/ui";
+import { vars } from "@/styles/theme.css";
 import { Entry, CATEGORY_MAP, CategoryMap, MajorCategory } from "@/types/ledger";
 import { TABLE_MIN_WIDTH } from "@/config/ui.config";
 import { ColumnHeaderFilter, ColumnOption } from "./ColumnHeaderFilter";
@@ -319,7 +320,7 @@ export function LedgerTable({
                 fontSize: "12px",
                 height: "26px",
                 padding: "0 8px",
-                color: "var(--color-destructive)",
+                color: vars.color.destructive,
               }}
             >
               ✕ 필터 초기화
@@ -348,7 +349,9 @@ export function LedgerTable({
           bg="surfaceSubtle"
           fontSize="xs"
           color="destructive"
-          style={{ border: "1px solid var(--color-destructive)" }}
+          borderWidth="1px"
+          borderStyle="solid"
+          borderColor="destructive"
         >
           ⚠️ {errorMsg}
         </Box>
@@ -379,9 +382,9 @@ export function LedgerTable({
           <thead>
             <tr
               style={{
-                backgroundColor: "var(--color-secondary)",
-                color: "var(--color-text)",
-                borderBottom: "1px solid var(--color-border)",
+                backgroundColor: vars.color.surfaceSubtle,
+                color: vars.color.text,
+                boxShadow: `inset 0 1px 0 0 ${vars.color.border}`,
                 position: "sticky",
                 top: 0,
                 zIndex: 20,
@@ -485,7 +488,7 @@ export function LedgerTable({
                   style={{
                     padding: "36px 16px",
                     textAlign: "center",
-                    color: "var(--color-text-muted)",
+                    color: vars.color.textMuted,
                   }}
                 >
                   {hasActiveFilter ? (
@@ -524,8 +527,8 @@ export function LedgerTable({
                     <tr
                       key={e.id}
                       style={{
-                        borderBottom: "1px solid var(--color-border)",
-                        backgroundColor: "var(--color-surface-subtle, rgba(var(--color-primary-rgb, 59,130,246),0.04))",
+                        borderBottom: `1px solid ${vars.color.border}`,
+                        backgroundColor: vars.color.surfaceSubtle,
                       }}
                     >
                       {/* 날짜 */}
@@ -548,9 +551,9 @@ export function LedgerTable({
                             fontSize: "13px",
                             width: "100%",
                             borderRadius: "6px",
-                            border: "1px solid var(--color-border)",
-                            background: "var(--color-surface)",
-                            color: "var(--color-text)",
+                            border: `1px solid ${vars.color.border}`,
+                            background: vars.color.surface,
+                            color: vars.color.text,
                             padding: "0 6px",
                           }}
                         >
@@ -572,9 +575,9 @@ export function LedgerTable({
                             fontSize: "13px",
                             width: "100%",
                             borderRadius: "6px",
-                            border: "1px solid var(--color-border)",
-                            background: "var(--color-surface)",
-                            color: "var(--color-text)",
+                            border: `1px solid ${vars.color.border}`,
+                            background: vars.color.surface,
+                            color: vars.color.text,
                             padding: "0 6px",
                           }}
                         >
@@ -649,14 +652,14 @@ export function LedgerTable({
                   <tr
                     key={e.id}
                     style={{
-                      borderBottom: "1px solid var(--color-border)",
+                      borderBottom: `1px solid ${vars.color.border}`,
                       transition: "background-color 0.15s ease",
                     }}
                   >
                     <td
                       style={{
                         padding: "10px 14px",
-                        color: "var(--color-text-muted)",
+                        color: vars.color.textMuted,
                         minWidth: "105px",
                         whiteSpace: "nowrap",
                         fontVariantNumeric: "tabular-nums",
@@ -667,10 +670,10 @@ export function LedgerTable({
                     <td style={{ padding: "10px 14px" }}>
                       <Badge variant={badgeVariant}>{cat?.label || e.major}</Badge>
                     </td>
-                    <td style={{ padding: "10px 14px", color: "var(--color-text)" }}>
+                    <td style={{ padding: "10px 14px", color: vars.color.text }}>
                       {cat?.subs[e.sub] || e.sub}
                     </td>
-                    <td style={{ padding: "10px 14px", fontWeight: 500, color: "var(--color-text)" }}>
+                    <td style={{ padding: "10px 14px", fontWeight: 500, color: vars.color.text }}>
                       {e.item}
                     </td>
                     <td
@@ -681,10 +684,10 @@ export function LedgerTable({
                         fontVariantNumeric: "tabular-nums",
                         color:
                           cat?.type === "income"
-                            ? "var(--color-success)"
+                            ? vars.color.success
                             : cat?.type === "save"
-                            ? "var(--color-save)"
-                            : "var(--color-text)",
+                            ? vars.color.save
+                            : vars.color.text,
                       }}
                     >
                       {formatWon(e.amount)}
@@ -698,8 +701,8 @@ export function LedgerTable({
                             height: "28px",
                             padding: "0 8px",
                             fontSize: "12px",
-                            borderColor: "var(--color-primary)",
-                            color: "var(--color-primary)",
+                            borderColor: vars.color.primary,
+                            color: vars.color.primary,
                           }}
                           onClick={() => handleEditStart(e)}
                         >
@@ -712,7 +715,7 @@ export function LedgerTable({
                             height: "28px",
                             padding: "0 8px",
                             fontSize: "12px",
-                            borderColor: "var(--color-border)",
+                            borderColor: vars.color.border,
                           }}
                           onClick={() => onDeleteEntry(e.id)}
                         >

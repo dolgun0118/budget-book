@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import { Box, Button, Input, Select } from "@/components/ui";
+import { vars } from "@/styles/theme.css";
 import { CategoryType } from "@/types/ledger";
 import { MajorRow, SubRow } from "@/services/categoryService";
 
 // ─── 타입 레이블 뱃지 ─────────────────────────────────────────────────────────
 
 const TYPE_LABELS: Record<CategoryType, { label: string; color: string; bg: string }> = {
-  income: { label: "수입", color: "var(--color-success)", bg: "var(--color-successSubtle)" },
-  expense: { label: "지출", color: "var(--color-destructive)", bg: "var(--color-destructiveSubtle)" },
-  save: { label: "저축", color: "var(--color-primary)", bg: "var(--color-primarySubtle)" },
+  income: { label: "수입", color: vars.color.success, bg: vars.color.successSubtle },
+  expense: { label: "지출", color: vars.color.destructive, bg: vars.color.destructiveSubtle },
+  save: { label: "저축", color: vars.color.primary, bg: vars.color.primarySubtle },
 };
 
 function TypeBadge({ type }: { type: CategoryType }) {
@@ -80,7 +81,10 @@ function MajorRowItem({ major, subCount, isSelected, onSelect, onEdit, onDelete 
         p="3"
         rounded="lg"
         bg="surfaceSubtle"
-        style={{ border: "1px solid var(--color-primary)", flexWrap: "wrap" }}
+        borderWidth="1px"
+        borderStyle="solid"
+        borderColor="primary"
+        style={{ flexWrap: "wrap" }}
       >
         <Input
           value={editLabel}
@@ -117,12 +121,12 @@ function MajorRowItem({ major, subCount, isSelected, onSelect, onEdit, onDelete 
       gap="3"
       p="3"
       rounded="lg"
+      borderWidth="1px"
+      borderStyle="solid"
+      borderColor={isSelected ? "primary" : "border"}
+      bg={isSelected ? "primarySubtle" : "surface"}
+      cursor="pointer"
       style={{
-        border: isSelected
-          ? "1px solid var(--color-primary)"
-          : "1px solid var(--color-border)",
-        backgroundColor: isSelected ? "var(--color-primarySubtle)" : "var(--color-surface)",
-        cursor: "pointer",
         transition: "all 0.15s ease",
       }}
       onClick={onSelect}
@@ -154,13 +158,9 @@ function MajorRowItem({ major, subCount, isSelected, onSelect, onEdit, onDelete 
         {confirming ? (
           <Button
             type="button"
+            variant="destructive"
             size="sm"
-            style={{
-              fontSize: "12px",
-              backgroundColor: "var(--color-destructive)",
-              color: "var(--color-destructiveForeground)",
-              border: "none",
-            }}
+            style={{ fontSize: "12px" }}
             onClick={handleDeleteClick}
           >
             확인삭제
@@ -171,7 +171,7 @@ function MajorRowItem({ major, subCount, isSelected, onSelect, onEdit, onDelete 
             variant="ghost"
             size="sm"
             onClick={handleDeleteClick}
-            style={{ fontSize: "12px", color: "var(--color-destructive)" }}
+            style={{ fontSize: "12px", color: vars.color.destructive }}
           >
             삭제
           </Button>
@@ -220,7 +220,10 @@ function AddMajorForm({ onAdd }: AddMajorFormProps) {
       p="3"
       rounded="lg"
       bg="surfaceSubtle"
-      style={{ border: "1px dashed var(--color-primary)", flexWrap: "wrap" }}
+      borderWidth="1px"
+      borderStyle="dashed"
+      borderColor="primary"
+      style={{ flexWrap: "wrap" }}
     >
       <Input
         value={id}
@@ -300,7 +303,10 @@ function SubRowItem({ sub, onEdit, onDelete }: SubRowItemProps) {
         p="2.5"
         rounded="lg"
         bg="surfaceSubtle"
-        style={{ border: "1px solid var(--color-primary)", flexWrap: "wrap" }}
+        borderWidth="1px"
+        borderStyle="solid"
+        borderColor="primary"
+        style={{ flexWrap: "wrap" }}
       >
         <Input
           value={editValue}
@@ -334,7 +340,10 @@ function SubRowItem({ sub, onEdit, onDelete }: SubRowItemProps) {
       gap="3"
       p="2.5"
       rounded="lg"
-      style={{ border: "1px solid var(--color-border)", backgroundColor: "var(--color-surface)" }}
+      borderWidth="1px"
+      borderStyle="solid"
+      borderColor="border"
+      bg="surface"
     >
       <Box style={{ flex: 1, minWidth: 0 }}>
         <Box display="flex" alignItems="center" gap="2">
@@ -344,10 +353,11 @@ function SubRowItem({ sub, onEdit, onDelete }: SubRowItemProps) {
           <Box
             fontSize="xs"
             color="textMuted"
+            bg="surfaceSubtle"
+            rounded="sm"
+            px="1"
+            py="0.5"
             style={{
-              padding: "1px 6px",
-              backgroundColor: "var(--color-secondary)",
-              borderRadius: "4px",
               fontFamily: "monospace",
             }}
           >
@@ -368,13 +378,9 @@ function SubRowItem({ sub, onEdit, onDelete }: SubRowItemProps) {
         {confirming ? (
           <Button
             type="button"
+            variant="destructive"
             size="sm"
-            style={{
-              fontSize: "12px",
-              backgroundColor: "var(--color-destructive)",
-              color: "var(--color-destructiveForeground)",
-              border: "none",
-            }}
+            style={{ fontSize: "12px" }}
             onClick={handleDeleteClick}
           >
             확인삭제
@@ -385,7 +391,7 @@ function SubRowItem({ sub, onEdit, onDelete }: SubRowItemProps) {
             variant="ghost"
             size="sm"
             onClick={handleDeleteClick}
-            style={{ fontSize: "12px", color: "var(--color-destructive)" }}
+            style={{ fontSize: "12px", color: vars.color.destructive }}
           >
             삭제
           </Button>
@@ -433,7 +439,10 @@ function AddSubForm({ majorId, onAdd }: AddSubFormProps) {
       p="2.5"
       rounded="lg"
       bg="surfaceSubtle"
-      style={{ border: "1px dashed var(--color-border)", flexWrap: "wrap" }}
+      borderWidth="1px"
+      borderStyle="dashed"
+      borderColor="border"
+      style={{ flexWrap: "wrap" }}
     >
       <Input
         value={value}
