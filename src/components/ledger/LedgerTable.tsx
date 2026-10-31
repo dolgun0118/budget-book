@@ -266,8 +266,8 @@ export function LedgerTable({
       setErrorMsg("항목명을 입력해주세요.");
       return;
     }
-    if (isNaN(amount) || amount <= 0) {
-      setErrorMsg("금액은 0원 초과로 입력해주세요.");
+    if (isNaN(amount) || amount === 0) {
+      setErrorMsg("금액은 0원이 아니게 입력해주세요.");
       return;
     }
 
@@ -510,9 +510,9 @@ export function LedgerTable({
                 </td>
               </tr>
             ) : (
-              filteredAndSortedEntries.map((e) => {
-                const isEditing = editingId === e.id;
-                const cat = map[isEditing ? (editingState?.major ?? e.major) : e.major];
+              filteredAndSortedEntries.map((ev) => {
+                const isEditing = editingId === ev.id;
+                const cat = map[isEditing ? (editingState?.major ?? ev.major) : ev.major];
                 const badgeVariant =
                   cat?.type === "income"
                     ? "income"
@@ -525,7 +525,7 @@ export function LedgerTable({
                   const editingCat = map[editingState.major];
                   return (
                     <tr
-                      key={e.id}
+                      key={ev.id}
                       style={{
                         borderBottom: `1px solid ${vars.color.border}`,
                         backgroundColor: vars.color.surfaceSubtle,
@@ -606,7 +606,9 @@ export function LedgerTable({
                           type="text"
                           value={editingState.amount}
                           onChange={(ev) => {
-                            const cleaned = ev.target.value.replace(/\D/g, "");
+                            const cleaned = ev.target.value
+                              .replace(/[^0-9-]/g, "")
+                              .replace(/(?!^)-/g, "");
                             handleFieldChange("amount", cleaned);
                           }}
                           style={{ height: "34px", fontSize: "13px", textAlign: "right" }}
@@ -650,7 +652,7 @@ export function LedgerTable({
                 // ── 일반 행 ──────────────────────────────────────────────────
                 return (
                   <tr
-                    key={e.id}
+                    key={ev.id}
                     style={{
                       borderBottom: `1px solid ${vars.color.border}`,
                       transition: "background-color 0.15s ease",
@@ -665,16 +667,16 @@ export function LedgerTable({
                         fontVariantNumeric: "tabular-nums",
                       }}
                     >
-                      {e.date}
+                      {ev.date}
                     </td>
                     <td style={{ padding: "10px 14px" }}>
-                      <Badge variant={badgeVariant}>{cat?.label || e.major}</Badge>
+                      <Badge variant={badgeVariant}>{cat?.label || ev.major}</Badge>
                     </td>
                     <td style={{ padding: "10px 14px", color: vars.color.text }}>
-                      {cat?.subs[e.sub] || e.sub}
+                      {cat?.subs[ev.sub] || ev.sub}
                     </td>
                     <td style={{ padding: "10px 14px", fontWeight: 500, color: vars.color.text }}>
-                      {e.item}
+                      {ev.item}
                     </td>
                     <td
                       style={{
@@ -690,7 +692,7 @@ export function LedgerTable({
                             : vars.color.text,
                       }}
                     >
-                      {formatWon(e.amount)}
+                      {formatWon(ev.amount)}
                     </td>
                     <td style={{ padding: "10px 14px", textAlign: "center" }}>
                       <Box display="flex" gap="1" justifyContent="center">
@@ -704,7 +706,7 @@ export function LedgerTable({
                             borderColor: vars.color.primary,
                             color: vars.color.primary,
                           }}
-                          onClick={() => handleEditStart(e)}
+                          onClick={() => handleEditStart(ev)}
                         >
                           수정
                         </Button>
@@ -717,7 +719,7 @@ export function LedgerTable({
                             fontSize: "12px",
                             borderColor: vars.color.border,
                           }}
-                          onClick={() => onDeleteEntry(e.id)}
+                          onClick={() => onDeleteEntry(ev.id)}
                         >
                           삭제
                         </Button>
