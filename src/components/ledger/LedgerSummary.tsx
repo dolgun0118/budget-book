@@ -61,8 +61,8 @@ export function LedgerSummary({ totals }: LedgerSummaryProps) {
         flexDirection="column"
         gap="1.5"
       >
-        <Box fontSize="xs" fontWeight="semibold" color="textMuted" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="총 지출 (공동+개인+특별)">
-          총 지출 (공동+개인+특별)
+        <Box fontSize="xs" fontWeight="semibold" color="textMuted" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="총 지출">
+          총 지출
         </Box>
         <Box
           fontSize={{ mobile: "lg", tablet: "2xl" }}

@@ -62,41 +62,16 @@ export function LedgerApp({ initialConfig, initialEntries }: LedgerAppProps) {
 
         {/* 3. 대분류별 상세 내역 아코디언 패널 */}
         <Box display="flex" flexDirection="column" gap="4" width="100%">
-          {Object.keys(categoryMap).map((majorKey) => {
-            const isSpecial =
-              majorKey === "specially_fixed" ||
-              majorKey === "special_fixed" ||
-              majorKey.toLowerCase().includes("special") ||
-              categoryMap[majorKey]?.label?.includes("특별");
-
-            const panelTotal =
-              majorKey === "income"
-                ? totals.income
-                : majorKey === "common"
-                ? totals.common
-                : majorKey === "personal"
-                ? totals.personal
-                : majorKey === "savings"
-                ? totals.savings
-                : isSpecial
-                ? totals.specially_fixed
-                : (groupedBySub[majorKey]
-                    ? Object.values(groupedBySub[majorKey])
-                        .flat()
-                        .reduce((acc, cur) => acc + cur.amount, 0)
-                    : 0);
-
-            return (
-              <LedgerPanel
-                key={majorKey}
-                major={majorKey}
-                total={panelTotal}
-                subGroups={groupedBySub[majorKey] || {}}
-                categoryInfo={categoryMap[majorKey]}
-                defaultOpen={true}
-              />
-            );
-          })}
+          {Object.keys(categoryMap).map((majorKey) => (
+            <LedgerPanel
+              key={majorKey}
+              major={majorKey}
+              total={totals.byMajor[majorKey] ?? 0}
+              subGroups={groupedBySub[majorKey] || {}}
+              categoryInfo={categoryMap[majorKey]}
+              defaultOpen={true}
+            />
+          ))}
         </Box>
 
         {/* 4. 내역 추가 양식 (다중 행 일괄 저장) */}

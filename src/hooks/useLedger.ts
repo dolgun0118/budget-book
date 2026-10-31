@@ -118,51 +118,38 @@ export function useLedger({ initialConfig, initialEntries }: UseLedgerProps) {
       specially_fixed: 0,
       totalExpense: 0,
       balance: 0,
+      byMajor: {},
     };
 
     entries.forEach((e) => {
-      const cat = categoryMap[e.major];
-      const type = cat?.type;
-      const majorKey = (e.major || "").trim().toLowerCase();
-      const majorLabel = (cat?.label || "").trim();
+      // 대분류별 합계 금액 누적
+      res.byMajor[e.major] = (res.byMajor[e.major] || 0) + e.amount;
 
-      // 1. 수입 (income)
-      if (majorKey === "income" || type === "income" || majorLabel.includes("수입")) {
+      // 대분류의 type 조회 (income | expense | save)
+      const catType = categoryMap[e.major]?.type ?? "expense";
+
+      if (catType === "income") {
         res.income += e.amount;
-        return;
-      }
-
-      // 2. 저축·투자 (save)
-      if (
-        majorKey === "savings" ||
-        majorKey === "saving" ||
-        type === "save" ||
-        majorLabel.includes("저축") ||
-        majorLabel.includes("투자")
-      ) {
+      } else if (catType === "save") {
         res.savings += e.amount;
-        return;
+      } else {
+        // type === "expense" (또는 미지정 시 기본 지출): 모든 지출 대분류를 총 지출에 합산
+        res.totalExpense += e.amount;
       }
 
-      // 3. 지출 (expense 및 기타 지출 항목)
-      const isSpecial =
-        majorKey === "specially_fixed" ||
-        majorKey === "special_fixed" ||
-        majorKey === "special" ||
-        majorKey.includes("special") ||
-        majorKey === "특별고정비" ||
-        majorLabel.includes("특별");
-
-      if (isSpecial) {
+      // 기존 특정 대분류 속성 호환성 유지
+      if (e.major === "common") res.common += e.amount;
+      else if (e.major === "personal") res.personal += e.amount;
+      else if (e.major === "savings") res.savings += e.amount;
+      else if (
+        e.major === "specially_fixed" ||
+        e.major === "special_fixed" ||
+        e.major === "special" ||
+        e.major.includes("special") ||
+        e.major === "특별고정비"
+      ) {
         res.specially_fixed += e.amount;
-      } else if (majorKey === "common" || majorLabel.includes("공동")) {
-        res.common += e.amount;
-      } else if (majorKey === "personal" || majorLabel.includes("개인")) {
-        res.personal += e.amount;
       }
-
-      // 공동, 개인, 특별고정비 등 모든 지출 내역을 총지출에 가산
-      res.totalExpense += e.amount;
     });
 
     res.balance = res.income - res.totalExpense - res.savings;

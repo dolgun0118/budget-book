@@ -86,4 +86,5 @@ export interface LedgerTotals {
   specially_fixed: number;
   totalExpense: number;
   balance: number;
+  byMajor: Record<string, number>;
 }
