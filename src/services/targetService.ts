@@ -195,19 +195,15 @@ export async function saveSubTargetAmount(
   }
 }
 
-/**
- * 소분류 목표 금액을 서버 동기화 및 실시간 구독하는 React 훅
- */
-export function useSubTargets(): TargetAmountMap {
-  const raw = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+let isRealtimeInitialized = false;
 
-  // 마운트 시 서버 데이터 동기화
-  useEffect(() => {
-    syncTargetsFromServer();
+function initRealtimeSync() {
+  if (typeof window === "undefined" || isRealtimeInitialized) return;
+  isRealtimeInitialized = true;
 
-    // Supabase Realtime 구독
-    const channel = supabase
-      .channel("sub_category_targets_changes")
+  try {
+    supabase
+      .channel("sub_category_targets_realtime")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: SUB_CATEGORY_TARGETS_TABLE },
@@ -216,10 +212,21 @@ export function useSubTargets(): TargetAmountMap {
         }
       )
       .subscribe();
+  } catch (err) {
+    console.warn("Realtime 채널 초기화 실패:", err);
+  }
+}
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+/**
+ * 소분류 목표 금액을 서버 동기화 및 실시간 구독하는 React 훅
+ */
+export function useSubTargets(): TargetAmountMap {
+  const raw = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  // 마운트 시 서버 데이터 동기화 및 실시간 구독 (싱글톤)
+  useEffect(() => {
+    syncTargetsFromServer();
+    initRealtimeSync();
   }, []);
 
   try {
