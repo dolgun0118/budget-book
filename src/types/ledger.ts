@@ -1,4 +1,4 @@
-export type MajorCategory = "income" | "common" | "personal" | "savings";
+export type MajorCategory = "income" | "common" | "personal" | "savings" | "specially_fixed";
 export type CategoryType = "income" | "expense" | "save";
 
 export interface SubCategoryItem {
@@ -83,6 +83,7 @@ export interface LedgerTotals {
   common: number;
   personal: number;
   savings: number;
+  specially_fixed: number;
   totalExpense: number;
   balance: number;
 }

@@ -3,14 +3,14 @@
 > **지식 ID**: KN-BIZ-001  
 > **카테고리**: 비즈니스 | 도메인  
 > **최초 등록일**: 2026-09-11  
-> **최종 갱신일**: 2026-09-20  
+> **최종 갱신일**: 2026-10-31  
 > **검증 상태**: Verified (검증됨)  
-> **관련 키워드**: `#domain-model`, `#category-system`, `#ledger`, `#budget`  
+> **관련 키워드**: `#domain-model`, `#category-system`, `#ledger`, `#budget`, `#specially-fixed`  
 
 ---
 
 ## 1. 지식 개요 (Overview)
-Budget Book 서비스의 핵심 비즈니스 도메인인 **부부 공동 가계부의 4대 분류 체계**, **순잔액 계산 공식**, **소분류 구조**를 정의합니다.
+Budget Book 서비스의 핵심 비즈니스 도메인인 **부부 공동 가계부의 5대 분류 체계**, **순잔액 계산 공식**, **소분류 구조**를 정의합니다.
 
 ---
 
@@ -18,17 +18,19 @@ Budget Book 서비스의 핵심 비즈니스 도메인인 **부부 공동 가계
 
 ### 2.1 Fact (검증된 사실)
 
-#### 4대 대분류 체계
+#### 대분류 체계
 | 대분류 Key | 레이블 | 타입 | 소분류 |
 | :--- | :--- | :--- | :--- |
-| `income` | 수입내역 | income | `donggun` (동건), `dabin` (다빈) |
-| `common` | 공동생활비 | expense | `fixed` (고정비), `variable` (변동비) |
+| `income` | 수입내역 | income | `donggun` (동건), `dabin` (다빈), `refund` (환급/기타) |
+| `specially_fixed` | 특별고정비 | expense | `loan` (대출/금융), `medical` (의료/건강) |
+| `common` | 공동생활비 | expense | `fixed` (고정비), `utility` (공과금/관리비), `food` (식비), `household` (생활용품), `medical` (의료/건강), `leisure` (문화/여가), `loan` (대출/금융), `appliance` (가전/가구), `reserve` (예비비/기타), `variable` (변동비) |
 | `personal` | 개인생활비 | expense | `donggun` (동건), `dabin` (다빈) |
 | `savings` | 저축·투자 | save | `common` (공동 저축), `donggun` (동건), `dabin` (다빈) |
 
-#### 순잔액 계산 공식
+#### 총 지출 및 순잔액 계산 공식
 ```
-순잔액 = 총 수입 - (공동생활비 + 개인생활비) - 저축·투자
+총 지출 = 공동생활비 + 개인생활비 + 특별고정비
+순잔액 = 총 수입 - 총 지출 - 저축·투자
 ```
 - 순잔액이 **양수(+)**: 수입 > 지출+저축 → 여유 현금 발생
 - 순잔액이 **음수(-)**: 지출+저축 > 수입 → 초과 지출 경고
@@ -38,7 +40,7 @@ Budget Book 서비스의 핵심 비즈니스 도메인인 **부부 공동 가계
 interface Entry {
   id: string;        // 고유 식별자 (timestamp + random)
   date: string;      // YYYY-MM-DD
-  major: MajorCategory; // "income" | "common" | "personal" | "savings"
+  major: MajorCategory; // "income" | "common" | "personal" | "savings" | "specially_fixed"
   sub: string;       // 소분류 key
   item: string;      // 항목명 (사용자 입력)
   amount: number;    // 금액 (원, 양수)
@@ -68,6 +70,7 @@ interface Entry {
 ---
 
 ## 5. 변경 이력 (Changelog)
+- **2026-10-31**: 특별고정비(`specially_fixed`)를 총지출 계산에 합산 반영 (`총 지출 = 공동 + 개인 + 특별`)
 - **2026-09-20**: Supabase DB (`ledger_entries`) 연동 및 실시간 동기화 지원
 - **2026-09-20**: 수입/개인생활비/저축 소분류를 원본 도메인에 맞추어 `mine/spouse`(나/배우자)에서 `donggun/dabin`(동건/다빈)으로 복원
 - **2026-09-11**: 최초 작성 (우리집가계부.html → Next.js 마이그레이션 과정에서 도메인 모델 확정)

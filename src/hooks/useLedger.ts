@@ -110,19 +110,64 @@ export function useLedger({ initialConfig, initialEntries }: UseLedgerProps) {
 
   // ─── 합계 계산 ──────────────────────────────────────────────────────────────
   const totals: LedgerTotals = useMemo(() => {
-    const res = { income: 0, common: 0, personal: 0, savings: 0, totalExpense: 0, balance: 0 };
+    const res: LedgerTotals = {
+      income: 0,
+      common: 0,
+      personal: 0,
+      savings: 0,
+      specially_fixed: 0,
+      totalExpense: 0,
+      balance: 0,
+    };
 
     entries.forEach((e) => {
-      if (e.major === "income") res.income += e.amount;
-      else if (e.major === "common") res.common += e.amount;
-      else if (e.major === "personal") res.personal += e.amount;
-      else if (e.major === "savings") res.savings += e.amount;
+      const cat = categoryMap[e.major];
+      const type = cat?.type;
+      const majorKey = (e.major || "").trim().toLowerCase();
+      const majorLabel = (cat?.label || "").trim();
+
+      // 1. 수입 (income)
+      if (majorKey === "income" || type === "income" || majorLabel.includes("수입")) {
+        res.income += e.amount;
+        return;
+      }
+
+      // 2. 저축·투자 (save)
+      if (
+        majorKey === "savings" ||
+        majorKey === "saving" ||
+        type === "save" ||
+        majorLabel.includes("저축") ||
+        majorLabel.includes("투자")
+      ) {
+        res.savings += e.amount;
+        return;
+      }
+
+      // 3. 지출 (expense 및 기타 지출 항목)
+      const isSpecial =
+        majorKey === "specially_fixed" ||
+        majorKey === "special_fixed" ||
+        majorKey === "special" ||
+        majorKey.includes("special") ||
+        majorKey === "특별고정비" ||
+        majorLabel.includes("특별");
+
+      if (isSpecial) {
+        res.specially_fixed += e.amount;
+      } else if (majorKey === "common" || majorLabel.includes("공동")) {
+        res.common += e.amount;
+      } else if (majorKey === "personal" || majorLabel.includes("개인")) {
+        res.personal += e.amount;
+      }
+
+      // 공동, 개인, 특별고정비 등 모든 지출 내역을 총지출에 가산
+      res.totalExpense += e.amount;
     });
 
-    res.totalExpense = res.common + res.personal;
     res.balance = res.income - res.totalExpense - res.savings;
     return res;
-  }, [entries]);
+  }, [entries, categoryMap]);
 
   // ─── 소분류별 그룹화 ─────────────────────────────────────────────────────────
   const groupedBySub = useMemo(() => {
