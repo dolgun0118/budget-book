@@ -262,26 +262,44 @@ function AddMajorForm({ onAdd }: AddMajorFormProps) {
 // ─── 소분류 행 컴포넌트 ───────────────────────────────────────────────────────
 
 interface SubRowItemProps {
+  majorId: string;
   sub: SubRow;
+  month: string;
+  targetAmount: number;
   onEdit: (id: string, value: string, label: string) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
+  onSaveTarget: (majorId: string, subValue: string, month: string, amount: number) => void;
 }
 
-function SubRowItem({ sub, onEdit, onDelete }: SubRowItemProps) {
+function SubRowItem({
+  majorId,
+  sub,
+  month,
+  targetAmount,
+  onEdit,
+  onDelete,
+  onSaveTarget,
+}: SubRowItemProps) {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(sub.value);
   const [editLabel, setEditLabel] = useState(sub.label);
+  const [editTarget, setEditTarget] = useState(targetAmount > 0 ? String(targetAmount) : "");
   const [confirming, setConfirming] = useState(false);
 
   const handleSave = async () => {
     if (!editValue.trim() || !editLabel.trim()) return;
     const ok = await onEdit(sub.id, editValue.trim(), editLabel.trim());
-    if (ok) setEditing(false);
+    if (ok) {
+      const parsedAmount = parseFloat(editTarget) || 0;
+      onSaveTarget(majorId, editValue.trim(), month, parsedAmount);
+      setEditing(false);
+    }
   };
 
   const handleCancel = () => {
     setEditValue(sub.value);
     setEditLabel(sub.label);
+    setEditTarget(targetAmount > 0 ? String(targetAmount) : "");
     setEditing(false);
   };
 
@@ -311,15 +329,24 @@ function SubRowItem({ sub, onEdit, onDelete }: SubRowItemProps) {
         <Input
           value={editValue}
           onChange={(e) => setEditValue(e.target.value)}
-          style={{ height: "32px", fontSize: "12px", width: "110px" }}
+          style={{ height: "32px", fontSize: "12px", width: "100px" }}
           placeholder="value (영문)"
           autoFocus
         />
         <Input
           value={editLabel}
           onChange={(e) => setEditLabel(e.target.value)}
-          style={{ height: "32px", fontSize: "12px", flex: "1", minWidth: "80px" }}
+          style={{ height: "32px", fontSize: "12px", flex: "1", minWidth: "90px" }}
           placeholder="표시 이름"
+        />
+        <Input
+          value={editTarget}
+          onChange={(e) => {
+            const cleaned = e.target.value.replace(/[^0-9]/g, "");
+            setEditTarget(cleaned);
+          }}
+          style={{ height: "32px", fontSize: "12px", width: "115px", textAlign: "right" }}
+          placeholder="목표 금액 (원)"
         />
         <Box display="flex" gap="1">
           <Button type="button" variant="default" size="sm" onClick={handleSave}>
@@ -346,8 +373,8 @@ function SubRowItem({ sub, onEdit, onDelete }: SubRowItemProps) {
       bg="surface"
     >
       <Box style={{ flex: 1, minWidth: 0 }}>
-        <Box display="flex" alignItems="center" gap="2">
-          <Box fontSize="sm" color="text">
+        <Box display="flex" alignItems="center" gap="2" style={{ flexWrap: "wrap" }}>
+          <Box fontSize="sm" color="text" fontWeight="medium">
             {sub.label}
           </Box>
           <Box
@@ -363,6 +390,19 @@ function SubRowItem({ sub, onEdit, onDelete }: SubRowItemProps) {
           >
             {sub.value}
           </Box>
+          <Box
+            fontSize="xs"
+            color={targetAmount > 0 ? "primary" : "textSubtle"}
+            bg="surfaceSubtle"
+            rounded="md"
+            px="2"
+            py="0.5"
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {targetAmount > 0
+              ? `목표: ${targetAmount.toLocaleString("ko-KR")}원`
+              : "목표: 미설정"}
+          </Box>
         </Box>
       </Box>
       <Box display="flex" gap="1">
@@ -370,7 +410,10 @@ function SubRowItem({ sub, onEdit, onDelete }: SubRowItemProps) {
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => setEditing(true)}
+          onClick={() => {
+            setEditTarget(targetAmount > 0 ? String(targetAmount) : "");
+            setEditing(true);
+          }}
           style={{ fontSize: "12px" }}
         >
           수정
@@ -405,20 +448,24 @@ function SubRowItem({ sub, onEdit, onDelete }: SubRowItemProps) {
 
 interface AddSubFormProps {
   majorId: string;
-  onAdd: (majorId: string, value: string, label: string) => Promise<boolean>;
+  month: string;
+  onAdd: (majorId: string, value: string, label: string, targetAmount?: number) => Promise<boolean>;
 }
 
-function AddSubForm({ majorId, onAdd }: AddSubFormProps) {
+function AddSubForm({ majorId, month, onAdd }: AddSubFormProps) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const [label, setLabel] = useState("");
+  const [targetAmount, setTargetAmount] = useState("");
 
   const handleSubmit = async () => {
     if (!value.trim() || !label.trim()) return;
-    const ok = await onAdd(majorId, value.trim(), label.trim());
+    const parsedAmount = parseFloat(targetAmount) || 0;
+    const ok = await onAdd(majorId, value.trim(), label.trim(), parsedAmount);
     if (ok) {
       setValue("");
       setLabel("");
+      setTargetAmount("");
       setOpen(false);
     }
   };
@@ -447,15 +494,24 @@ function AddSubForm({ majorId, onAdd }: AddSubFormProps) {
       <Input
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        style={{ height: "32px", fontSize: "12px", width: "110px" }}
+        style={{ height: "32px", fontSize: "12px", width: "100px" }}
         placeholder="value (영문)"
         autoFocus
       />
       <Input
         value={label}
         onChange={(e) => setLabel(e.target.value)}
-        style={{ height: "32px", fontSize: "12px", flex: "1", minWidth: "80px" }}
+        style={{ height: "32px", fontSize: "12px", flex: "1", minWidth: "90px" }}
         placeholder="표시 이름"
+      />
+      <Input
+        value={targetAmount}
+        onChange={(e) => {
+          const cleaned = e.target.value.replace(/[^0-9]/g, "");
+          setTargetAmount(cleaned);
+        }}
+        style={{ height: "32px", fontSize: "12px", width: "115px", textAlign: "right" }}
+        placeholder="목표 금액 (원)"
       />
       <Box display="flex" gap="1">
         <Button type="button" variant="default" size="sm" onClick={handleSubmit}>

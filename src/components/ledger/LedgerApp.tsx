@@ -70,6 +70,7 @@ export function LedgerApp({ initialConfig, initialEntries }: LedgerAppProps) {
               subGroups={groupedBySub[majorKey] || {}}
               categoryInfo={categoryMap[majorKey]}
               defaultOpen={true}
+              currentMonth={currentMonth}
             />
           ))}
         </Box>

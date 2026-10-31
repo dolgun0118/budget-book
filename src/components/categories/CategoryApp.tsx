@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Box, Button } from "@/components/ui";
+import { Box, Button, Input } from "@/components/ui";
 import { vars } from "@/styles/theme.css";
 import { useCategories } from "@/hooks/useCategories";
 import { MajorRow, SubRow } from "@/services/categoryService";
@@ -10,6 +10,7 @@ import { CategoryType } from "@/types/ledger";
 import { MajorRowItem, AddMajorForm, SubRowItem, AddSubForm } from "./CategoryItems";
 import { APP_LOGO_TEXT, APP_DISPLAY_NAME } from "@/config/app.config";
 import { LAYOUT_MAX_WIDTH } from "@/config/ui.config";
+import { useSubTargets, saveSubTargetAmount, getSubTargetAmount } from "@/services/targetService";
 
 interface CategoryAppProps {
   initialMajors: MajorRow[];
@@ -30,6 +31,14 @@ export function CategoryApp({ initialMajors, initialSubs }: CategoryAppProps) {
     removeSub,
     getSubsForMajor,
   } = useCategories({ initialMajors, initialSubs });
+
+  const targets = useSubTargets();
+
+  // 목표 금액 적용 기준 월 (기본값: 현재 당월)
+  const [targetMonth, setTargetMonth] = useState<string>(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  });
 
   // 선택된 대분류 (소분류 패널 표시용)
   const [selectedMajorId, setSelectedMajorId] = useState<string | null>(
@@ -58,11 +67,30 @@ export function CategoryApp({ initialMajors, initialSubs }: CategoryAppProps) {
   };
 
   // 소분류 핸들러
-  const handleAddSub = async (majorId: string, value: string, label: string) =>
-    addSub({ major_id: majorId, value, label });
+  const handleAddSub = async (
+    majorId: string,
+    value: string,
+    label: string,
+    targetAmount?: number
+  ) => {
+    const ok = await addSub({ major_id: majorId, value, label });
+    if (ok && targetAmount !== undefined && targetAmount > 0) {
+      saveSubTargetAmount(majorId, value, targetMonth, targetAmount);
+    }
+    return ok;
+  };
 
   const handleEditSub = async (id: string, value: string, label: string) =>
     editSub(id, { value, label });
+
+  const handleSaveTarget = (
+    majorId: string,
+    subValue: string,
+    month: string,
+    amount: number
+  ) => {
+    saveSubTargetAmount(majorId, subValue, month, amount);
+  };
 
   return (
     <Box
@@ -237,9 +265,36 @@ export function CategoryApp({ initialMajors, initialSubs }: CategoryAppProps) {
                       — {selectedMajor.label}
                     </Box>
                   </Box>
-                  <Box fontSize="xs" color="textMuted">
-                    {selectedSubs.length}개
+
+                  {/* 목표 금액 적용 기준 월 설정 */}
+                  <Box display="flex" alignItems="center" gap="2">
+                    <Box fontSize="xs" fontWeight="semibold" color="textMuted">
+                      목표 적용 월:
+                    </Box>
+                    <Input
+                      type="month"
+                      value={targetMonth}
+                      onChange={(e) => {
+                        if (e.target.value) setTargetMonth(e.target.value);
+                      }}
+                      style={{ height: "30px", fontSize: "12px", width: "135px" }}
+                    />
+                    <Box fontSize="xs" color="textMuted">
+                      {selectedSubs.length}개
+                    </Box>
                   </Box>
+                </Box>
+
+                <Box
+                  px="3"
+                  py="2"
+                  rounded="md"
+                  bg="surfaceSubtle"
+                  fontSize="xs"
+                  color="textMuted"
+                  style={{ lineHeight: "1.5" }}
+                >
+                  💡 <strong>{targetMonth}</strong> 기준 목표 금액입니다. 금액을 변경하면 해당 월부터 적용되며 이전 달의 목표 금액은 그대로 유지됩니다.
                 </Box>
 
                 {selectedSubs.length === 0 ? (
@@ -253,18 +308,35 @@ export function CategoryApp({ initialMajors, initialSubs }: CategoryAppProps) {
                   </Box>
                 ) : (
                   <Box display="flex" flexDirection="column" gap="2">
-                    {selectedSubs.map((sub) => (
-                      <SubRowItem
-                        key={sub.id}
-                        sub={sub}
-                        onEdit={handleEditSub}
-                        onDelete={removeSub}
-                      />
-                    ))}
+                    {selectedSubs.map((sub) => {
+                      const subTargetAmount = getSubTargetAmount(
+                        targets,
+                        selectedMajor.id,
+                        sub.value,
+                        targetMonth
+                      );
+
+                      return (
+                        <SubRowItem
+                          key={sub.id}
+                          majorId={selectedMajor.id}
+                          sub={sub}
+                          month={targetMonth}
+                          targetAmount={subTargetAmount}
+                          onEdit={handleEditSub}
+                          onDelete={removeSub}
+                          onSaveTarget={handleSaveTarget}
+                        />
+                      );
+                    })}
                   </Box>
                 )}
 
-                <AddSubForm majorId={selectedMajor.id} onAdd={handleAddSub} />
+                <AddSubForm
+                  majorId={selectedMajor.id}
+                  month={targetMonth}
+                  onAdd={handleAddSub}
+                />
               </>
             ) : (
               <Box

@@ -5,6 +5,7 @@ import { Box, Badge } from "@/components/ui";
 import { vars } from "@/styles/theme.css";
 import { CATEGORY_MAP, Entry, CategoryInfo } from "@/types/ledger";
 import { SUBCATEGORY_COLOR_PALETTE, PANEL_EMPTY_SUB_PREVIEW_COUNT } from "@/config/ui.config";
+import { useSubTargets, getSubTargetAmount } from "@/services/targetService";
 
 interface LedgerPanelProps {
   major: string;
@@ -12,6 +13,7 @@ interface LedgerPanelProps {
   subGroups: Record<string, Entry[]>;
   categoryInfo?: CategoryInfo;
   defaultOpen?: boolean;
+  currentMonth?: string;
 }
 
 function formatWon(amount: number) {
@@ -24,8 +26,10 @@ export function LedgerPanel({
   subGroups,
   categoryInfo: customCategoryInfo,
   defaultOpen = true,
+  currentMonth = "",
 }: LedgerPanelProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const targets = useSubTargets();
   const categoryInfo =
     customCategoryInfo ||
     CATEGORY_MAP[major] || {
@@ -137,9 +141,9 @@ export function LedgerPanel({
             {/* Subcategory Summary Mini Cards */}
             <Box
               display="grid"
-              gap="2"
+              gap="2.5"
               style={{
-                gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
               }}
             >
               {displayedSubs.map(([subKey, subLabel], idx) => {
@@ -148,6 +152,7 @@ export function LedgerPanel({
                 const percent =
                   total > 0 ? ((subTotal / total) * 100).toFixed(1) : "0.0";
                 const accentColor = SUBCATEGORY_COLOR_PALETTE[idx % SUBCATEGORY_COLOR_PALETTE.length];
+                const targetAmount = getSubTargetAmount(targets, major, subKey, currentMonth);
 
                 return (
                   <Box
@@ -187,8 +192,18 @@ export function LedgerPanel({
                     >
                       {formatWon(subTotal)}
                     </Box>
-                    <Box fontSize="xs" color="textSubtle">
-                      {items.length}건
+                    <Box
+                      fontSize="xs"
+                      color={targetAmount > 0 ? "textMuted" : "textSubtle"}
+                      style={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                      title={targetAmount > 0 ? `목표 ${formatWon(targetAmount)}` : "목표 미설정"}
+                    >
+                      {targetAmount > 0 ? `목표 ${formatWon(targetAmount)}` : "목표 미설정"}
                     </Box>
                   </Box>
                 );
