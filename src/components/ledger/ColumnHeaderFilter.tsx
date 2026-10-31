@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { Box, Button, Input } from "@/components/ui";
 import { vars } from "@/styles/theme.css";
 
@@ -45,6 +46,8 @@ export function ColumnHeaderFilter({
 }: ColumnHeaderFilterProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const popoverRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left?: number; right?: number }>({ top: 0 });
 
   const isSortedAsc = currentSort?.key === columnKey && currentSort.direction === "asc";
   const isSortedDesc = currentSort?.key === columnKey && currentSort.direction === "desc";
@@ -52,12 +55,59 @@ export function ColumnHeaderFilter({
     selectedValues.length > 0 ||
     (isAmount && (amountRange.min !== "" || amountRange.max !== ""));
 
+  // 팝오버 뷰포트 절대 좌표 계산 (테이블 스크롤 및 뷰포트 경계 탈출)
+  const updatePosition = () => {
+    if (!buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    const popoverWidth = 260;
+    const popoverHeight = 340;
+
+    let top = rect.bottom + 6;
+    // 화면 하단을 벗어날 경우 버튼 위로 띄움
+    if (top + popoverHeight > window.innerHeight && rect.top > popoverHeight) {
+      top = Math.max(10, rect.top - popoverHeight - 6);
+    }
+
+    let left: number | undefined = undefined;
+    let right: number | undefined = undefined;
+
+    // 우측 컬럼이거나 우측 화면 경계를 벗어나는 경우 우측 정렬
+    if (align === "right" || rect.left + popoverWidth > window.innerWidth - 10) {
+      right = Math.max(10, window.innerWidth - rect.right);
+    } else {
+      left = Math.max(10, rect.left);
+    }
+
+    setCoords({ top, left, right });
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    updatePosition();
+
+    const handleScrollOrResize = () => {
+      updatePosition();
+    };
+
+    window.addEventListener("resize", handleScrollOrResize);
+    window.addEventListener("scroll", handleScrollOrResize, true);
+
+    return () => {
+      window.removeEventListener("resize", handleScrollOrResize);
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+    };
+  }, [isOpen]);
+
   // 팝오버 외부 클릭 시 닫기
   useEffect(() => {
     if (!isOpen) return;
 
     const handleOutsideClick = (e: MouseEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (buttonRef.current && buttonRef.current.contains(target)) {
+        return;
+      }
+      if (popoverRef.current && !popoverRef.current.contains(target)) {
         onClose();
       }
     };
@@ -133,6 +183,7 @@ export function ColumnHeaderFilter({
 
       {/* 엑셀형 필터 드롭다운 토글 버튼 */}
       <button
+        ref={buttonRef}
         type="button"
         onClick={(e) => {
           e.stopPropagation();
@@ -168,11 +219,11 @@ export function ColumnHeaderFilter({
         </svg>
       </button>
 
-      {/* ── 엑셀형 필터 팝오버 카드 ────────────────────────────────────────── */}
-      {isOpen && (
+      {/* ── 엑셀형 필터 팝오버 카드 (Portal로 테이블 스크롤 영역 탈출) ────────────────────────── */}
+      {isOpen && typeof document !== "undefined" && createPortal(
         <Box
           ref={popoverRef}
-          position="absolute"
+          position="fixed"
           bg="surface"
           p="3"
           rounded="xl"
@@ -180,12 +231,13 @@ export function ColumnHeaderFilter({
           borderStyle="solid"
           borderColor="border"
           style={{
-            top: "calc(100% + 6px)",
-            [align === "right" ? "right" : "left"]: 0,
-            zIndex: 999,
+            top: `${coords.top}px`,
+            ...(coords.left !== undefined ? { left: `${coords.left}px` } : {}),
+            ...(coords.right !== undefined ? { right: `${coords.right}px` } : {}),
+            zIndex: 99999,
             minWidth: "220px",
             maxWidth: "280px",
-            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.15)",
             textAlign: "left",
           }}
           onClick={(e) => e.stopPropagation()}
@@ -388,7 +440,8 @@ export function ColumnHeaderFilter({
               확인
             </Button>
           </Box>
-        </Box>
+        </Box>,
+        document.body
       )}
     </Box>
   );
