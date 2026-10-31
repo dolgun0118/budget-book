@@ -1,6 +1,8 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { supabase } from "@/lib/supabase";
+import { SUB_CATEGORY_TARGETS_TABLE } from "@/config/ledger.config";
 
 export const TARGET_STORAGE_KEY = "budget_book_subcategory_targets";
 
@@ -58,6 +60,43 @@ export function loadTargetAmountMap(): TargetAmountMap {
 }
 
 /**
+ * Supabase 서버에서 목표 금액 데이터 조회 및 로컬 캐시 동기화
+ */
+export async function syncTargetsFromServer(): Promise<TargetAmountMap> {
+  try {
+    const { data, error } = await supabase
+      .from(SUB_CATEGORY_TARGETS_TABLE)
+      .select("*");
+
+    if (error) {
+      // 테이블이 아직 없거나 권한 오류인 경우 로컬 캐시 유지
+      console.warn("Supabase 목표 금액 조회 건너뜀 (테이블 미생성 시):", error.message);
+      return loadTargetAmountMap();
+    }
+
+    if (data && Array.isArray(data)) {
+      const serverMap: TargetAmountMap = {};
+      data.forEach((row: { major_id: string; sub_value: string; month: string; amount: number }) => {
+        if (!serverMap[row.month]) {
+          serverMap[row.month] = {};
+        }
+        const fullKey = `${row.major_id}:${row.sub_value}`;
+        serverMap[row.month][fullKey] = Number(row.amount || 0);
+      });
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem(TARGET_STORAGE_KEY, JSON.stringify(serverMap));
+        emitChange();
+      }
+      return serverMap;
+    }
+  } catch (err) {
+    console.warn("Supabase 목표 금액 동기화 실패:", err);
+  }
+  return loadTargetAmountMap();
+}
+
+/**
  * 특정 월 기준 소분류의 유효 목표 금액 산출
  * - 해당 월에 설정값이 있으면 그 값 사용
  * - 해당 월에 없으면 이전 월 중 가장 최신 설정값을 승계 (과거 값 보존 원칙)
@@ -107,38 +146,82 @@ export function getSubTargetAmount(
 }
 
 /**
- * 특정 월부터 적용될 소분류 목표 금액 저장
+ * 특정 월부터 적용될 소분류 목표 금액을 서버(Supabase) 및 로컬스토리지에 저장
  */
-export function saveSubTargetAmount(
+export async function saveSubTargetAmount(
   majorId: string,
   subValue: string,
   month: string,
   amount: number
-): void {
-  if (typeof window === "undefined") return;
+): Promise<void> {
+  const cleanAmount = Math.max(0, Math.round(amount));
 
-  const currentMap = loadTargetAmountMap();
-  const fullKey = `${majorId}:${subValue}`;
+  // 1. Optimistic Update (클라이언트 즉시 반영)
+  if (typeof window !== "undefined") {
+    const currentMap = loadTargetAmountMap();
+    const fullKey = `${majorId}:${subValue}`;
 
-  if (!currentMap[month]) {
-    currentMap[month] = {};
+    if (!currentMap[month]) {
+      currentMap[month] = {};
+    }
+    currentMap[month][fullKey] = cleanAmount;
+
+    try {
+      localStorage.setItem(TARGET_STORAGE_KEY, JSON.stringify(currentMap));
+      emitChange();
+    } catch (err) {
+      console.error("로컬 스토리지 목표 금액 저장 실패:", err);
+    }
   }
 
-  currentMap[month][fullKey] = Math.max(0, Math.round(amount));
-
+  // 2. 서버 (Supabase) 저장
   try {
-    localStorage.setItem(TARGET_STORAGE_KEY, JSON.stringify(currentMap));
-    emitChange();
+    const payload = {
+      major_id: majorId,
+      sub_value: subValue,
+      month: month,
+      amount: cleanAmount,
+    };
+
+    const { error } = await supabase
+      .from(SUB_CATEGORY_TARGETS_TABLE)
+      .upsert(payload, { onConflict: "major_id,sub_value,month" });
+
+    if (error) {
+      console.warn("Supabase 목표 금액 저장 오류 (테이블 미생성 시 로컬 유지):", error.message);
+    }
   } catch (err) {
-    console.error("목표 금액 저장 실패:", err);
+    console.warn("Supabase 목표 금액 저장 요청 실패:", err);
   }
 }
 
 /**
- * 소분류 목표 금액을 실시간 구독하는 React 훅
+ * 소분류 목표 금액을 서버 동기화 및 실시간 구독하는 React 훅
  */
 export function useSubTargets(): TargetAmountMap {
   const raw = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  // 마운트 시 서버 데이터 동기화
+  useEffect(() => {
+    syncTargetsFromServer();
+
+    // Supabase Realtime 구독
+    const channel = supabase
+      .channel("sub_category_targets_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: SUB_CATEGORY_TARGETS_TABLE },
+        () => {
+          syncTargetsFromServer();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   try {
     return JSON.parse(raw) as TargetAmountMap;
   } catch {

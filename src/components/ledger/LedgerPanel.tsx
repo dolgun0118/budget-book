@@ -25,7 +25,7 @@ export function LedgerPanel({
   total,
   subGroups,
   categoryInfo: customCategoryInfo,
-  defaultOpen = true,
+  defaultOpen = false,
   currentMonth = "",
 }: LedgerPanelProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);

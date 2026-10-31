@@ -7,6 +7,7 @@
 export const LEDGER_TABLE = "ledger_entries" as const;
 export const MAJOR_CATEGORIES_TABLE = "major_categories" as const;
 export const SUB_CATEGORIES_TABLE = "sub_categories" as const;
+export const SUB_CATEGORY_TARGETS_TABLE = "sub_category_targets" as const;
 
 // ─── 기본 조회 기간 설정 ───────────────────────────────────────────────────────
 /** 기본 조회 기간: 최근 N년 */

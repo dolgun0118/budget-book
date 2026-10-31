@@ -69,7 +69,7 @@ export function LedgerApp({ initialConfig, initialEntries }: LedgerAppProps) {
               total={totals.byMajor[majorKey] ?? 0}
               subGroups={groupedBySub[majorKey] || {}}
               categoryInfo={categoryMap[majorKey]}
-              defaultOpen={true}
+              defaultOpen={false}
               currentMonth={currentMonth}
             />
           ))}
