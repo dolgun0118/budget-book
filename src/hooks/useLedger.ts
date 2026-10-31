@@ -112,20 +112,17 @@ export function useLedger({ initialConfig, initialEntries }: UseLedgerProps) {
   const totals: LedgerTotals = useMemo(() => {
     const res: LedgerTotals = {
       income: 0,
-      common: 0,
-      personal: 0,
-      savings: 0,
-      specially_fixed: 0,
       totalExpense: 0,
+      savings: 0,
       balance: 0,
       byMajor: {},
     };
 
     entries.forEach((e) => {
-      // 대분류별 합계 금액 누적
+      // 대분류별 합계 금액 누적 (패널 연동용)
       res.byMajor[e.major] = (res.byMajor[e.major] || 0) + e.amount;
 
-      // 대분류의 type 조회 (income | expense | save)
+      // 대분류의 type(income | expense | save)에 따른 동적 합산
       const catType = categoryMap[e.major]?.type ?? "expense";
 
       if (catType === "income") {
@@ -133,22 +130,7 @@ export function useLedger({ initialConfig, initialEntries }: UseLedgerProps) {
       } else if (catType === "save") {
         res.savings += e.amount;
       } else {
-        // type === "expense" (또는 미지정 시 기본 지출): 모든 지출 대분류를 총 지출에 합산
         res.totalExpense += e.amount;
-      }
-
-      // 기존 특정 대분류 속성 호환성 유지
-      if (e.major === "common") res.common += e.amount;
-      else if (e.major === "personal") res.personal += e.amount;
-      else if (e.major === "savings") res.savings += e.amount;
-      else if (
-        e.major === "specially_fixed" ||
-        e.major === "special_fixed" ||
-        e.major === "special" ||
-        e.major.includes("special") ||
-        e.major === "특별고정비"
-      ) {
-        res.specially_fixed += e.amount;
       }
     });
 

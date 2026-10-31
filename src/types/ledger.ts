@@ -80,11 +80,8 @@ export interface Entry {
 
 export interface LedgerTotals {
   income: number;
-  common: number;
-  personal: number;
-  savings: number;
-  specially_fixed: number;
   totalExpense: number;
+  savings: number;
   balance: number;
   byMajor: Record<string, number>;
 }
