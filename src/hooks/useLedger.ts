@@ -99,14 +99,43 @@ export function useLedger({ initialConfig, initialEntries }: UseLedgerProps) {
     };
   }, [refreshAvailableMonths, loadEntries, currentMonth]);
 
-  // ── 월 변경 시 해당 월 데이터를 새로 fetch ───────────────────────────────────
+  // ── 월 변경 시 해당 월 데이터를 새로 fetch + URL 쿼리 파라미터 동기화 ─────────
   const handleMonthChange = useCallback(
-    async (month: string) => {
+    async (month: string, skipUrlUpdate = false) => {
       setCurrentMonth(month);
+      if (!skipUrlUpdate && typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.set("month", month);
+        window.history.replaceState({}, "", url.toString());
+      }
       await loadEntries(month);
     },
     [loadEntries]
   );
+
+  // ── URL 초기화 및 popstate(뒤로가기/앞으로가기) 처리 ──────────────────────────
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // URL에 month 파라미터가 없으면 현재 월로 채움 (setState 호출 없음)
+    const url = new URL(window.location.href);
+    if (!url.searchParams.get("month") && currentMonth) {
+      url.searchParams.set("month", currentMonth);
+      window.history.replaceState({}, "", url.toString());
+    }
+
+    // 뒤로가기/앞으로가기 감지 — 이벤트 콜백 내 setState는 ESLint 허용
+    const handlePopState = () => {
+      const popUrl = new URL(window.location.href);
+      const popMonth = popUrl.searchParams.get("month");
+      if (popMonth && popMonth !== currentMonth) {
+        handleMonthChange(popMonth, true);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [currentMonth, handleMonthChange]);
 
   // ─── 합계 계산 ──────────────────────────────────────────────────────────────
   const totals: LedgerTotals = useMemo(() => {

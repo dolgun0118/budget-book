@@ -71,7 +71,7 @@ function buildCategoryMap(majorsData: MajorRow[], subsData: SubRow[]): CategoryM
 /**
  * 서버 컴포넌트에서 초기 진입 시 필요한 설정값 및 데이터를 한 번에 가져오는 함수
  */
-export async function getInitialLedgerData(): Promise<{
+export async function getInitialLedgerData(requestedMonth?: string): Promise<{
   initialConfig: AppInitialConfig;
   initialEntries: Entry[];
 }> {
@@ -98,10 +98,14 @@ export async function getInitialLedgerData(): Promise<{
     ).sort().reverse() as string[];
   }
 
-  // 기본 월 설정: 최신 데이터가 있는 월 또는 당월, 없으면 ALL_MONTHS_KEY
-  const defaultMonth = availableMonths.includes(currentYearMonth)
+  // 기본 월 설정: 요청된 쿼리 파라미터 월 > 최신 데이터 월 또는 당월 > ALL_MONTHS_KEY
+  const fallbackDefault = availableMonths.includes(currentYearMonth)
     ? currentYearMonth
     : availableMonths[0] || ALL_MONTHS_KEY;
+
+  const defaultMonth = requestedMonth && (availableMonths.includes(requestedMonth) || requestedMonth === ALL_MONTHS_KEY || /^\d{4}-\d{2}$/.test(requestedMonth))
+    ? requestedMonth
+    : fallbackDefault;
 
   // 2. 초기 선택 월의 내역 데이터 조회
   let entriesQuery = supabase
