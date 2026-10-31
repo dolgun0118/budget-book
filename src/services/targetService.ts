@@ -106,7 +106,7 @@ export function getSubTargetAmount(
   majorId: string,
   subValue: string,
   month: string
-): number {
+): number | null {
   const fullKey = `${majorId}:${subValue}`;
 
   if (!month || month === "all") {
@@ -116,7 +116,8 @@ export function getSubTargetAmount(
       if (targets[m]?.[fullKey] !== undefined) return targets[m][fullKey];
       if (targets[m]?.[subValue] !== undefined) return targets[m][subValue];
     }
-    return 0;
+
+    return null;
   }
 
   // 1. 해당 월에 직접 설정된 값 확인
@@ -142,7 +143,7 @@ export function getSubTargetAmount(
     }
   }
 
-  return 0;
+  return null;
 }
 
 /**

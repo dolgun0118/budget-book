@@ -265,7 +265,7 @@ interface SubRowItemProps {
   majorId: string;
   sub: SubRow;
   month: string;
-  targetAmount: number;
+  targetAmount: number | null;
   onEdit: (id: string, value: string, label: string) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
   onSaveTarget: (majorId: string, subValue: string, month: string, amount: number) => void;
@@ -283,7 +283,7 @@ function SubRowItem({
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(sub.value);
   const [editLabel, setEditLabel] = useState(sub.label);
-  const [editTarget, setEditTarget] = useState(targetAmount > 0 ? String(targetAmount) : "");
+  const [editTarget, setEditTarget] = useState(targetAmount !== null ? String(targetAmount) : "");
   const [confirming, setConfirming] = useState(false);
 
   const handleSave = async () => {
@@ -299,7 +299,7 @@ function SubRowItem({
   const handleCancel = () => {
     setEditValue(sub.value);
     setEditLabel(sub.label);
-    setEditTarget(targetAmount > 0 ? String(targetAmount) : "");
+    setEditTarget(targetAmount !== null ? String(targetAmount) : "");
     setEditing(false);
   };
 
@@ -390,19 +390,17 @@ function SubRowItem({
           >
             {sub.value}
           </Box>
-          <Box
+         {targetAmount !== null &&  <Box
             fontSize="xs"
-            color={targetAmount > 0 ? "primary" : "textSubtle"}
+            color="primary"
             bg="surfaceSubtle"
             rounded="md"
             px="2"
             py="0.5"
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
-            {targetAmount > 0
-              ? `목표: ${targetAmount.toLocaleString("ko-KR")}원`
-              : "목표: 미설정"}
-          </Box>
+            {`목표: ${targetAmount.toLocaleString("ko-KR")}원`}
+          </Box>}
         </Box>
       </Box>
       <Box display="flex" gap="1">
@@ -411,7 +409,7 @@ function SubRowItem({
           variant="outline"
           size="sm"
           onClick={() => {
-            setEditTarget(targetAmount > 0 ? String(targetAmount) : "");
+            setEditTarget(targetAmount !== null ? String(targetAmount) : "");
             setEditing(true);
           }}
           style={{ fontSize: "12px" }}

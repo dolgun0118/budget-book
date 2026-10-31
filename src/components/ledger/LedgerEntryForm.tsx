@@ -373,7 +373,9 @@ export function LedgerEntryForm({
                     placeholder="0"
                     value={row.amount}
                     onChange={(e) => {
-                      const cleaned = e.target.value.replace(/[^0-9]/g, "");
+                      const cleaned = e.target.value
+                        .replace(/[^0-9-]/g, "")
+                        .replace(/(?!^)-/g, "");
                       handleRowChange(row.id, "amount", cleaned);
                     }}
                     style={{ height: "36px", fontSize: "13px" }}

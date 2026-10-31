@@ -192,19 +192,19 @@ export function LedgerPanel({
                     >
                       {formatWon(subTotal)}
                     </Box>
-                    <Box
-                      fontSize="xs"
-                      color={targetAmount > 0 ? "textMuted" : "textSubtle"}
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                      title={targetAmount > 0 ? `목표 ${formatWon(targetAmount)}` : "목표 미설정"}
-                    >
-                      {targetAmount > 0 ? `목표 ${formatWon(targetAmount)}` : "목표 미설정"}
-                    </Box>
+                      {targetAmount !== null && <Box
+                        fontSize="xs"
+                        color={targetAmount > 0 ? "textMuted" : "textSubtle"}
+                        style={{
+                          whiteSpace: "nowrap",
+                            overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                        title={`목표 ${formatWon(targetAmount)}`}
+                      >
+                        {`목표 ${formatWon(targetAmount)}`}
+                      </Box>}
                   </Box>
                 );
               })}
