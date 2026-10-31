@@ -134,7 +134,7 @@ export function LedgerEntryForm({
         !r.date ||
         !r.item.trim() ||
         isNaN(numAmount) ||
-        numAmount <= 0
+        numAmount === 0
       ) {
         invalidRows.push(idx + 1);
       } else {
